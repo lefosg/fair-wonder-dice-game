@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dice Games</title>
+
+    <style>
+        /* Todo με CSS ΌΠΩΣ ΘΑ ΤΟ ΔΩ */
+    </style>
+</head>
+<body>
+    <h1>Welcome to fair dice games!</h1>
+    <h2>An account is needed to proceed.</h2>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <!--AGE VERIFICATION-->
+        <script>
+            function checkAge() {
+                var birthdate = new Date(document.getElementById("birthdate").value);
+                var today = new Date();
+                var age = today.getFullYear() - birthdate.getFullYear();
+                var monthDiff = today.getMonth() - birthdate.getMonth();
+                
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
+                    age--;
+                }
+    
+                if (age < 22) {
+                    alert("You are under 22 years old. You have no right to proceed!");
+                } else {
+                    alert("You are 22 years old or older.You may proceed the registration");
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <label for="birthdate">Enter your birthdate:</label>
+        <input type="date" id="birthdate"><br><br>
+        <button onclick="checkAge()">Check Age</button>
+    </body>
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <!--PASSWORD VALIDATION-->
+        <script>
+            function validatePassword() {
+                var password = document.getElementById("password").value;
+                var confirm_password = document.getElementById("confirm_password").value;
+    
+                if (password != confirm_password) {
+                    document.getElementById("password_err").innerHTML = "Passwords do not match";
+                    return false;
+                } else {
+                    document.getElementById("password_err").innerHTML = "";
+                    return true;
+                }
+            }
+        </script>
+    </head>
+    <div class="register-container">
+        <h3>Register Form</h3>
+        <form action="register.php" method="post">
+            <label for="txtFirstName">First Name:</label>
+            <input type="text" id="txtFirstName" name="firstName" minlength="3" maxlength="30"  required>
+            <br>
+            <label for="txtLastName">Last Name: </label>
+            <input type="text" id="txtLastName" name="lastName" minlength="3" maxlength="30"  required>
+            <br>
+            <div class="input-group">
+                <label for="new_username">Username:</label>
+                <input type="text" id="new_username" name="new_username" required>
+            </div>      
+                
+    <form action="submit_form.php" method="post" onsubmit="return validatePassword()">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br>
+        <label for="confirm_password">Confirm Password:</label>
+        <input type="password" id="confirm_password" name="confirm_password" required><br>
+
+        <span id="password_err" style="color: red;"></span><br>
+
+        <input type="submit" value="Submit">
+        <button type="submit">Register</button>
+        <button type="submit">Cancel</button>
+    </form>
+</body>
+
+
+    <footer>
+        <p><footer>
+            <p>&copy;AUEB_2024</p>
+        </footer></p>
+    </footer>
+</body>
+</html>
