@@ -2,6 +2,8 @@ const express = require('express');
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
+const path = require('path');
+const database = require('mysql2');
 
 //Initialization
 const app = express();
@@ -15,8 +17,14 @@ const HTTPS_PORT = 8443;
 const DOMAIN = "localhost"
 const httpServer = http.createServer(app);
 const httpsServer = https.createServer(credentials, app);
-const database = require('mysql2');
 
+app.use(express.static('public'))
+app.use(express.json());
+//print type of request and url in every request
+app.use((request, response, next) => {
+    console.log(request.method, request.url);
+    next();
+})
 
 //Redirect HTTP to HTTPS
 app.use(function (req, res, next) {
@@ -25,10 +33,25 @@ app.use(function (req, res, next) {
     }
     next();
 });
+
+//Game route
+const game_route = require('./routes/play_game.js');
+app.use('/play', game_route);
+
+//Auth route
+const auth_route = require('./routes/auth.js');
+app.use('/auth', auth_route);
+
+//Index api is here, don't make route for it
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '/public/index.html'));
+});
+
+
+/**
+ * DATABASE
+ */
 // Initialize connection to our database GDPR in Mysql via Nodejs
-
-
-
 var mysqlconn = database.createConnection({
     host: "localhost",
     user: "root",
@@ -68,11 +91,9 @@ mysqlconn.connect(function (error) {
 
 //Spin the server
 httpServer.listen(HTTP_PORT, () => {
-    console.log("HTTP server listening on https://" + DOMAIN + ":" + HTTP_PORT)
+    console.log("HTTP server listening on http://" + DOMAIN + ":" + HTTP_PORT)
 });
 
 httpsServer.listen(HTTPS_PORT, () => {
     console.log("HTTPS server listening on https://" + DOMAIN + ":" + HTTPS_PORT)
 });
-
-
