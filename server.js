@@ -1,3 +1,4 @@
+// Const variables (with libraries required)
 const express = require('express');
 const fs = require('fs');
 const http = require('http');
@@ -11,7 +12,7 @@ const certificate = fs.readFileSync('security/FAIRDICE.crt', 'utf8');
 const privateKey = fs.readFileSync('security/FAIRDICE.key', 'utf8');
 const credentials = { key: privateKey, cert: certificate };
 
-//const vars
+//Const variables
 const HTTP_PORT = 8080;
 const HTTPS_PORT = 8443;
 const DOMAIN = "localhost"
@@ -50,46 +51,70 @@ app.get('/', (req, res) => {
 
 /**
  * DATABASE
- */
+  */
 // Initialize connection to our database GDPR in Mysql via Nodejs
 var mysqlconn = database.createConnection({
     host: "localhost",
     user: "root",
-    password: "rout",
+    password: "rout", //Pas$w0rd446500!!@@## (For Kkostakis)
     database: "GDPR",
     port: 3306
 });
 
+// process.exit() is utilized to terminate the code in case of failure
 mysqlconn.connect(function (error) {
     if (error) {
         console.log("Couldn't connect :(Error: " + error);
+        process.exit(1);
     } else {
         console.log("Connected successfully to GDPR Database!!!");
 
-        var testquery = 'select * from users';
+        // Inserting new users into the GDPR Database 
+        // The ignore syntax is utilized with insert in order to avoid inserting duplicate values in our GDPR Database
+        var sqlquery1 = `insert ignore into users(firstname, lastname, username, password, id) values('f3312307', 'AsoeSec', 'Kkostakis', 'Pass123', 1)`;
+        var sqlquery2 = `insert ignore into users(firstname, lastname, username, password, id) values('Admini', 'Archibald', 'Administrator', 'L$mD0wer1', 2)`;
 
-        mysqlconn.query(testquery, (error, rows) => {
-            if (error) throw error;
-            console.log(rows);
+
+        // Execute query#1
+        mysqlconn.query(sqlquery1, (error, rows) => {
+            if (error) {
+                console.error('There was an error when executing first query!!!: ' + error.stack);
+                process.exit(1);
+            }
+            else {
+                console.log("First User Query");
+                console.log(rows);
+            }
         });
+
+         // Execute query#2
+        mysqlconn.query(sqlquery2, (error, rows2) => {
+            if (error) {
+                console.error('There was an error when executing second query!!!: ' + error.stack);
+                process.exit(1);
+            }
+            else {
+                console.log("Administrator Query");
+                console.log(rows2);
+            }
+
+        // End the connection with our database in mysql
+        mysqlconn.end(function(error) {
+            if (error) {
+                console.error("There was an issue with the closure process" + error.stack);
+                process.exit(1);
+            }
+            else {
+                console.log("The connection with Mysql has ended successfully!!!");
+            }
+            process.exit(1);
+        }); 
+     });      
+        
     }
 });
 
-
-// End the connection with our database in mysql
-/* mysqlconn.end(function(error) {
-    if (error) {
-        console.error("There was an issue with the closure process" + error.stack);
-        return;
-    }
-
-    console.log("The connection with Mysql has ended successfully!!!");
-}) */
-
-
-
-
-//Spin the server
+// Spin the server
 httpServer.listen(HTTP_PORT, () => {
     console.log("HTTP server listening on http://" + DOMAIN + ":" + HTTP_PORT)
 });
