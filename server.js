@@ -54,8 +54,8 @@ app.get('/', (req, res) => {
 // Initialize connection to our database GDPR in Mysql via Nodejs
 var mysqlconn = database.createConnection({
     host: "localhost",
-    user: "netsec",
-    password: "netsec",
+    user: "root",
+    password: "rout",
     database: "GDPR",
     port: 3306
 });

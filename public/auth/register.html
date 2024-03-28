@@ -4,48 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <title>Dice Games</title>
-
+    <link rel="stylesheet" href="register.css" 
     <style>
-        /* Todo με CSS ΌΠΩΣ ΘΑ ΤΟ ΔΩ */
+        <!--/* Todo με CSS ΌΠΩΣ ΘΑ ΤΟ ΔΩ */-->
     </style>
 </head>
 <body>
-    <h1>Welcome to fair dice games!</h1>
-    <h2>An account is needed to proceed.</h2>
+    <h1>Welcome to fair dice games!</h1><br><br><br>
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <!--AGE VERIFICATION-->
-        <script>
-            function checkAge() {
-                var birthdate = new Date(document.getElementById("birthdate").value);
-                var today = new Date();
-                var age = today.getFullYear() - birthdate.getFullYear();
-                var monthDiff = today.getMonth() - birthdate.getMonth();
-                
-                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
-                    age--;
-                }
-    
-                if (age < 22) {
-                    alert("You are under 22 years old. You have no right to proceed!");
-                } else {
-                    alert("You are 22 years old or older.You may proceed the registration");
-                }
-            }
-        </script>
-    </head>
-    <body>
-        <label for="birthdate">Enter your birthdate:</label>
-        <input type="date" id="birthdate"><br><br>
-        <button onclick="checkAge()">Check Age</button>
-    </body>
-
-    <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+        
         <!--PASSWORD VALIDATION-->
         <script>
             function validatePassword() {
@@ -65,6 +37,9 @@
     <div class="register-container">
         <h3>Register Form</h3>
         <form action="register.php" method="post">
+            <div> 
+                <img src="001.png" ><br>
+           
             <label for="txtFirstName">First Name:</label>
             <input type="text" id="txtFirstName" name="firstName" minlength="3" maxlength="30"  required>
             <br>
@@ -75,6 +50,7 @@
                 <label for="new_username">Username:</label>
                 <input type="text" id="new_username" name="new_username" required>
             </div>      
+        </div>
                 
     <form action="submit_form.php" method="post" onsubmit="return validatePassword()">
         <label for="password">Password:</label>
@@ -84,7 +60,7 @@
 
         <span id="password_err" style="color: red;"></span><br>
 
-        <input type="submit" value="Submit">
+        <input type="submit" value="Submit"><br><br>
         <button type="submit">Register</button>
         <button type="submit">Cancel</button>
     </form>
