@@ -55,7 +55,7 @@ app.get('/', (req, res) => {
 var mysqlconn = database.createConnection({
     host: "localhost",
     user: "root",
-    password: "Pas$w0rd446500!!@@##",
+    password: "rout",
     database: "GDPR",
     port: 3306
 });
