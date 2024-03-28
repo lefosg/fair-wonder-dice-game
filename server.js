@@ -6,13 +6,13 @@ const https = require('https');
 const path = require('path');
 const database = require('mysql2');
 
-//Initialization
+// Initialization
 const app = express();
 const certificate = fs.readFileSync('security/FAIRDICE.crt', 'utf8');
 const privateKey = fs.readFileSync('security/FAIRDICE.key', 'utf8');
 const credentials = { key: privateKey, cert: certificate };
 
-//Const variables
+// Const variables
 const HTTP_PORT = 8080;
 const HTTPS_PORT = 8443;
 const DOMAIN = "localhost"
@@ -21,13 +21,13 @@ const httpsServer = https.createServer(credentials, app);
 
 app.use(express.static('public'))
 app.use(express.json());
-//print type of request and url in every request
+// print type of request and url in every request
 app.use((request, response, next) => {
     console.log(request.method, request.url);
     next();
 })
 
-//Redirect HTTP to HTTPS
+// Redirect HTTP to HTTPS
 app.use(function (req, res, next) {
     if (process.env.NODE_ENV != 'development' && !req.secure) {
         return res.redirect("https://" + DOMAIN + ":" + HTTPS_PORT + req.url);
@@ -35,15 +35,15 @@ app.use(function (req, res, next) {
     next();
 });
 
-//Game route
+// Game route
 const game_route = require('./routes/play_game.js');
 app.use('/play', game_route);
 
-//Auth route
+// Authentication route
 const auth_route = require('./routes/auth.js');
 app.use('/auth', auth_route);
 
-//Index api is here, don't make route for it
+// Index api is here, don't make route for it
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '/public/index.html'));
 });
@@ -56,7 +56,7 @@ app.get('/', (req, res) => {
 var mysqlconn = database.createConnection({
     host: "localhost",
     user: "root",
-    password: "rout", //Pas$w0rd446500!!@@## (For Kkostakis)
+    password: "rout", // Pas$w0rd446500!!@@## (For Kkostakis)
     database: "GDPR",
     port: 3306
 });
