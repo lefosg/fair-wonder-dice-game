@@ -7,7 +7,7 @@ const path = require('path');
 const database = require('mysql2');
 require('dotenv').config();
 
-//Initialization
+// Initialization
 const app = express();
 const certificate = fs.readFileSync('security/FAIRDICE.crt', 'utf8');
 const privateKey = fs.readFileSync('security/FAIRDICE.key', 'utf8');
@@ -28,7 +28,7 @@ app.use((request, response, next) => {
     next();
 });
 
-//Redirect HTTP to HTTPS
+// Redirect HTTP to HTTPS
 app.use(function (req, res, next) {
     if (process.env.NODE_ENV != 'development' && !req.secure) {
         return res.redirect("https://" + DOMAIN + ":" + HTTPS_PORT + req.url);
@@ -36,15 +36,15 @@ app.use(function (req, res, next) {
     next();
 });
 
-//Game route
+// Game route
 const game_route = require('./routes/play_game.js');
 app.use('/play', game_route);
 
-//Auth route
+// Authentication route
 const auth_route = require('./routes/auth.js');
 app.use('/auth', auth_route);
 
-//Index api is here, don't make route for it
+// Index api is here, don't make route for it
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '/public/index.html'));
 });
@@ -55,7 +55,7 @@ app.get('/', (req, res) => {
   */
 // Initialize connection to our database GDPR in Mysql via Nodejs
 var mysqlconn = database.createConnection({
-    host: process.env.DOMAIN,
+    host: DOMAIN,
     user: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
