@@ -18,13 +18,13 @@ const DOMAIN = "localhost"
 const httpServer = http.createServer(app);
 const httpsServer = https.createServer(credentials, app);
 
-app.use(express.static('public'))
+app.use(express.static('public'));
 app.use(express.json());
-//print type of request and url in every request
+//print type of request and url in every request, todo: log instead of print
 app.use((request, response, next) => {
     console.log(request.method, request.url);
     next();
-})
+});
 
 //Redirect HTTP to HTTPS
 app.use(function (req, res, next) {
@@ -54,8 +54,8 @@ app.get('/', (req, res) => {
 // Initialize connection to our database GDPR in Mysql via Nodejs
 var mysqlconn = database.createConnection({
     host: "localhost",
-    user: "root",
-    password: "Pas$w0rd446500!!@@##",
+    user: "netsec",
+    password: "netsec",
     database: "GDPR",
     port: 3306
 });
