@@ -4,6 +4,7 @@ const http = require('http');
 const https = require('https');
 const path = require('path');
 const database = require('mysql2');
+require('dotenv').config();
 
 //Initialization
 const app = express();
@@ -12,9 +13,9 @@ const privateKey = fs.readFileSync('security/FAIRDICE.key', 'utf8');
 const credentials = { key: privateKey, cert: certificate };
 
 //const vars
-const HTTP_PORT = 8080;
-const HTTPS_PORT = 8443;
-const DOMAIN = "localhost"
+const HTTP_PORT = process.env.HTTP_PORT;
+const HTTPS_PORT = process.env.HTTPS_PORT;
+const DOMAIN = process.env.DOMAIN
 const httpServer = http.createServer(app);
 const httpsServer = https.createServer(credentials, app);
 
@@ -54,8 +55,8 @@ app.get('/', (req, res) => {
 // Initialize connection to our database GDPR in Mysql via Nodejs
 var mysqlconn = database.createConnection({
     host: "localhost",
-    user: "root",
-    password: "rout",
+    user: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
     database: "GDPR",
     port: 3306
 });
