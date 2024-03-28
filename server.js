@@ -100,7 +100,7 @@ mysqlconn.connect(function (error) {
             }
 
             // End the connection with our database in mysql
-            mysqlconn.end(function (error) {
+            /*mysqlconn.end(function (error) {
                 if (error) {
                     console.error("There was an issue with the closure process" + error.stack);
                     process.exit(1);
@@ -109,7 +109,7 @@ mysqlconn.connect(function (error) {
                     console.log("The connection with Mysql has ended successfully!!!");
                 }
                 process.exit(1);
-            });
+            }); */
         });
 
     }
