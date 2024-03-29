@@ -94,7 +94,7 @@ mysqlconn.connect(function (error) {
         // Second salt
         const secondsalt = RandomSalty();
 
-        // Passwords entered by the  administrator
+        // Passwords entered by the administrator
         const adminpassword = SHA3hashPassword('L$mD0wer1', secondsalt);
 
         var sqlquery2 = `insert ignore into users(firstname, lastname, username, password, id) values('Admini', 'Archibald', 'Administrator', ?, 2) on duplicate key update password = values(password)`;
