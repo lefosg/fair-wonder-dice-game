@@ -5,6 +5,7 @@ const http = require('http');
 const https = require('https');
 const path = require('path');
 const database = require('mysql2');
+const crypto = require('crypto-js');
 require('dotenv').config();
 
 // Initialization
@@ -49,6 +50,15 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '/public/index.html'));
 });
 
+// Pass sha3 encryption salted to user password via the following function
+function SHA3hashPassword(secretpass, salt) {
+    return crypto.SHA3(secretpass + salt).toString(crypto.enc.Hex);
+}
+
+// Create a random salt as an extra measure to the password encryption
+function RandomSalty() {
+    return crypto.lib.WordArray.random(16).toString(crypto.enc.Hex);
+}
 
 /**
  * DATABASE
@@ -71,14 +81,28 @@ mysqlconn.connect(function (error) {
         console.log("Connected successfully to GDPR Database!!!");
 
         // Inserting new users into the GDPR Database 
-        // The ignore syntax is utilized with insert in order to avoid inserting duplicate values in our GDPR Database
+        // The ignore syntax is utilized with insert in order to avoid inserting duplicate values in our GDPR Database (with the use of Prepared Statements to prevent SQL Injection)
         // Return all the values from the GDPR Database
-        var sqlquery1 = `insert ignore into users(firstname, lastname, username, password, id) values('f3312307', 'AsoeSec', 'Kkostakis', 'Pass123', 1)`;
-        var sqlquery2 = `insert ignore into users(firstname, lastname, username, password, id) values('Admini', 'Archibald', 'Administrator', 'L$mD0wer1', 2)`;
+        // First salt
+        const firstsalt = RandomSalty();
+
+        // Passwords entered by the first user
+        const userpassword = SHA3hashPassword('Pass123', firstsalt);
+
+        var sqlquery1 = `insert ignore into users(firstname, lastname, username, password, id) values('f3312307', 'AsoeSec', 'Kkostakis', ?, 1) on duplicate key update password = values(password)`;
+
+        // Second salt
+        const secondsalt = RandomSalty();
+
+        // Passwords entered by the  administrator
+        const adminpassword = SHA3hashPassword('L$mD0wer1', secondsalt);
+
+        var sqlquery2 = `insert ignore into users(firstname, lastname, username, password, id) values('Admini', 'Archibald', 'Administrator', ?, 2) on duplicate key update password = values(password)`;
+
         var sqlquery3 = `select * from users`;
 
         // Execute query#1
-        mysqlconn.query(sqlquery1, (error, rows) => {
+        mysqlconn.query(sqlquery1, [userpassword], (error, rows) => {
             if (error) {
                 console.error('There was an error when executing first query!!!: ' + error.stack);
                 process.exit(1);
@@ -90,7 +114,7 @@ mysqlconn.connect(function (error) {
         });
 
         // Execute query#2
-        mysqlconn.query(sqlquery2, (error, rows2) => {
+        mysqlconn.query(sqlquery2, [adminpassword], (error, rows2) => {
             if (error) {
                 console.error('There was an error when executing second query!!!: ' + error.stack);
                 process.exit(1);
@@ -103,7 +127,7 @@ mysqlconn.connect(function (error) {
             // Execute query#3
             mysqlconn.query(sqlquery3, (error, rows3) => {
                 if (error) {
-                    console.error('There was an error when executing thrid query!!!: ' + error.stack);
+                    console.error('There was an error when executing third query!!!: ' + error.stack);
                     process.exit(1);
                 }
                 else {
