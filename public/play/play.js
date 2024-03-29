@@ -1,6 +1,10 @@
 
-DICE_MAX = 7;
-DICE_MIN = 1;
+var DICE_MAX = 7;
+var DICE_MIN = 1;
+
+function hash() {
+    return;
+}
 
 function rollDice() {
     return Math.floor(Math.random() * (DICE_MAX - DICE_MIN) + DICE_MIN);
