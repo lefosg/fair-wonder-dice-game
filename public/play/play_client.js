@@ -1,6 +1,6 @@
 
-var DICE_MAX = 7;
-var DICE_MIN = 1;
+const DICE_MAX = 7;
+const DICE_MIN = 1;
 
 function hash() {
     return;
@@ -18,6 +18,6 @@ function generateRandomSecret(size = 20) {
 }
 
 document.getElementById('roll_dice_button').addEventListener('click', () => {
-    result = rollDice();
+    let result = rollDice();
     document.getElementById('roll_result').innerText = result;
 });
