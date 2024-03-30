@@ -5,12 +5,8 @@ const { sha3hash } = require('../helper.js');
 
 const router = Router();
 
-router.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/auth/login.html'));
-});
-
-router.get('/register', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/auth/register.html'));
+router.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/auth/login_register.html'));
 });
 
 /**
@@ -26,7 +22,7 @@ router.post('/login', (req, res) => {
         //1. get user from database, TODOTODOTODOTODO: PREPARED STATEMENT + CHECK FOR SQL INJECTION IN HERE
         mysqlconn.query(`SELECT password FROM users WHERE username='${username}'`, function (err, result, fields) {
             if (err) throw err;
-            console.log(result);
+            // console.log(result);
             //if no records where returned, the given username does not exist
             if (result.length == 0) {
                 res.json({ status: "username or password is invalid" });
@@ -35,15 +31,17 @@ router.post('/login', (req, res) => {
             let stored_pass_hash = result[0].password;
             //2. hash the given password
             let password_hash = sha3hash(password);
+            console.log(password_hash);
+            console.log(stored_pass_hash);
             //3. decrypt result.password that was retrieved from database
 
             //4. check if (2.)hashed password == (3.)decrypted password
             if (password_hash == stored_pass_hash) {
                 console.log("logging in");
-                res.json({ "status": 'logged in' });
+                res.json({ "status": 'successfully authenticated' });
             } else {
                 console.log("failed to log in");
-                res.json({ "status": "failed to auth" });
+                res.json({ "status": "username or password is invalid" });
             }
             //5. if true, log in (todo: jwt token)
         });
