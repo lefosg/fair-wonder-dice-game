@@ -1,11 +1,11 @@
 
 async function login() {
     //get username and password from form
-    let uname = document.getElementById('username').value;
-    let pword = document.getElementById('password').value;
+    let uname = document.getElementById('login_username').value;
+    let pword = document.getElementById('login_password').value;
 
     //send credentials to server
-    const response = await fetch('https://localhost:8443/auth/login', {
+    fetch('https://localhost:8443/auth/login', {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
@@ -15,20 +15,18 @@ async function login() {
             username: uname,
             password: pword
         })
-    });
-
-    //the user should be redirected once authenticated
-    const r = await response.json();
-    console.log(r);
+    })
+        .then(r => r.json())
+        .then(r => console.log(r))
+        .catch(err => console.log(err));
 }
 
-function register() {
+async function register() {
     //get user info from form
-    let fname = document.getElementById('txtFirstName').value;
-    let lname = document.getElementById('txtLastName').value;
-    let uname = document.getElementById('username').value;
-    let pword = document.getElementById('password').value;
-    let pword_conf = document.getElementById('confirm_password').value;
+    let fname = document.getElementById('register_first_name').value;
+    let lname = document.getElementById('register_last_name').value;
+    let uname = document.getElementById('register_username').value;
+    let pword = document.getElementById('register_password').value;
 
     //send credentials to server
     fetch('https://localhost:8443/auth/register', {
@@ -41,10 +39,12 @@ function register() {
             first_name: fname,
             last_name: lname,
             username: uname,
-            password: pword,
-            confirmed_password: pword_conf
+            password: pword
         })
-    });
+    })
+        .then(r => r.json())
+        .then(r => console.log(r))
+        .catch(err => console.log(err));
 }
 
 var a = document.getElementById("loginBtn");
