@@ -17,7 +17,12 @@ async function login() {
         })
     })
         .then(r => r.json())
-        .then(r => console.log(r))
+        .then(r => {
+            if (r.auth == false) {
+                document.getElementById('login_password').value = "";
+                alert(r.msg);
+            }
+        })
         .catch(err => console.log(err));
 }
 
@@ -43,8 +48,28 @@ async function register() {
         })
     })
         .then(r => r.json())
-        .then(r => console.log(r))
+        .then(r => {
+            if (r.reg == true) {
+                clearRegisterForm();
+                show_login();
+            } else {
+                document.getElementById('register_username').value = "";
+            }
+            alert(r.msg);
+        })
         .catch(err => console.log(err));
+}
+
+function clearRegisterForm() {
+    document.getElementById('register_first_name').value = "";
+    document.getElementById('register_last_name').value = "";
+    document.getElementById('register_username').value = "";
+    document.getElementById('register_password').value = "";
+}
+
+function clearLoginForm() {
+    document.getElementById('login_username').value = "";
+    document.getElementById('login_password').value = "";
 }
 
 var a = document.getElementById("loginBtn");
@@ -53,6 +78,7 @@ var x = document.getElementById("login");
 var y = document.getElementById("register");
 
 function show_login() {
+    clearRegisterForm();
     x.style.left = "4px";
     y.style.right = "-520px";
     a.className += " white-btn";
@@ -62,6 +88,7 @@ function show_login() {
 }
 
 function show_register() {
+    clearLoginForm();
     x.style.left = "-510px";
     y.style.right = "5px";
     a.className = "btn";

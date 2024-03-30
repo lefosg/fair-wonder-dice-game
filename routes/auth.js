@@ -5,6 +5,11 @@ const { sha3hash } = require('../helper.js');
 
 const router = Router();
 
+const login_true_response = { auth: true, msg: "logged in" };
+const login_false_response = { auth: false, msg: "username or password invalid" };
+const register_true_response = { reg: true, msg: "registered" };
+const register_false_response = { reg: false, msg: "username taken" };
+
 router.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/auth/login_register.html'));
 });
@@ -23,7 +28,7 @@ router.post('/login', (req, res) => {
         // console.log(result);
         //if no records where returned, the given username does not exist
         if (result.length == 0) {
-            res.json({ status: "username or password is invalid" });
+            res.json(login_false_response);
             return;
         }
         let stored_pass_hash = result[0].password;
@@ -36,14 +41,13 @@ router.post('/login', (req, res) => {
         //4. check if (2.)hashed password == (3.)decrypted password
         if (password_hash == stored_pass_hash) {
             console.log("logging in");
-            res.json({ "status": 'successfully authenticated' });
+            res.json(login_true_response);
         } else {
             console.log("failed to log in");
-            res.json({ "status": "username or password is invalid" });
+            res.json(login_false_response);
         }
         //5. if true, log in (todo: jwt token)
     });
-
 });
 
 /**
@@ -58,7 +62,7 @@ router.post('/register', (req, res) => {
         if (err) throw err;
         //if the result array has one (or more?) elements, the username exists
         if (result.length > 0) {
-            return res.json({ status: "username exists" });
+            return res.json(register_false_response);
         } else {
             //2. if not exists, insert user into db
             //2.a. hash and encrypt the password
@@ -69,7 +73,7 @@ router.post('/register', (req, res) => {
 
                 if (err) throw err;
                 console.log("Registered");
-                return res.json({ status: "registered" });
+                return res.json(register_true_response);
             });
         }
     });
