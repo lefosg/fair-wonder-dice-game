@@ -4,6 +4,7 @@ const mysqlconn = require('../database/db.js');
 const { SHA3hashPassword } = require('../helper.js');
 const { StaticSalty } = require('../helper.js');
 const { JWTTokenDice } = require('../helper.js');
+const inputValidate = require('validator');
 
 const router = Router();
 
@@ -24,6 +25,15 @@ router.post('/login', (req, res) => {
     const { username, password } = req.body;
     console.log("Attempting login with credentials: " + username + " " + password);
 
+    // Extra measures to further prevent SQL Injection Attempts like user input sanitization
+    if (!inputValidate.isAlphanumeric(username)) {
+        return res.status(400).json({ error: "!!!Invalid username format!!!"});
+    }
+
+    if (/[-'"]/g.test(username)) {
+        return res.status(400).json({ error: "Username cannot contain symbols like '-' or single quote or double quote!!!" });
+    }
+
     //1. get user from database, with the use of PreparedStatement as a measure against SQL Injection
     mysqlconn.query(`SELECT password FROM users WHERE username=?`, [username], function (err, result, fields) {
         if (err) 
@@ -40,10 +50,8 @@ router.post('/login', (req, res) => {
 
         //2. Retrieve the hashed password and the according salt from the database for the aforesaid user
         const stored_pass_hash = result[0].password;
-        const dbhashed = Buffer.from(stored_pass_hash, 'binary').toString('utf8');
+        const dbhashed = Buffer.from(stored_pass_hash, 'binary').toString('utf8'); // Utilized to convert the varbinary type in MySQL to binary and then to string
         const salted = StaticSalty();
-        console.log(dbhashed);
-        console.log(salted);
 
         //3. hash the given password with the salt
         const hashedPassword = SHA3hashPassword(password, salted);
@@ -72,7 +80,16 @@ router.post('/register', (req, res) => {
     const { first_name, last_name, username, password } = req.body;
     const salty = StaticSalty();
 
-    //1. check if user already in db, if exists, throw error
+    // Extra measures to further prevent SQL Injection Attempts like user input sanitization
+    if (!inputValidate.isAlphanumeric(username)) {
+        return res.status(400).json({ error: "!!!Invalid username format!!!"});
+    }
+
+    if (/[-'"]/g.test(username)) {
+        return res.status(400).json({ error: "Username must not contain malformed characters such as '-' or single quote or double quote!!!" });
+    }
+
+    //1. check if user already in db, if exists, throw error (Prepared Statements)
     mysqlconn.query(`SELECT * FROM users WHERE username=?`, [username], (err, result, fields) => {
         if (err) throw err;
         //if the result array has one (or more?) elements, the username exists
