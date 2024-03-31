@@ -3,12 +3,9 @@ require('dotenv').config();
 const { Router } = require('express');
 const path = require('path');
 const mysqlconn = require('../database/db.js');
-const { SHA3hashPassword } = require('../helper.js');
-const { generateRandomSecret } = require('../helper.js');
-const { JWTTokenDice } = require('../helper.js');
-const { AESEncryptHashedPass } = require('../helper.js');
-const { AESDecryptHashedPass } = require('../helper.js');
+const { SHA3hashPassword, generateRandomSecret, checkJWTExists, AESEncryptHashedPass, AESDecryptHashedPass } = require('../helper.js');
 const inputValidate = require('validator');
+const jwt = require('jsonwebtoken');
 
 const router = Router();
 const pass_key = process.env.PASSWORD_KEY;
@@ -20,14 +17,14 @@ const register_false_response = { auth: false, msg: "username taken" };
 const invalid_uname_format = { auth: false, msg: "!!!Invalid username format!!!" };
 const bad_characters = { auth: false, msg: "Username cannot contain symbols like '-' or single quote or double quote!!!" };
 
-router.get('/', (req, res) => {
+router.get('/', checkJWTExists, (req, res) => {
     res.sendFile(path.join(__dirname, '../public/auth/login_register.html'));
 });
 
 /**
  * Authenticate user login
  */
-router.post('/login', (req, res) => {
+router.post('/login', checkJWTExists, (req, res) => {
     //0. get the credentials from the post request
     const { username, password } = req.body;
     console.log("Attempting login with credentials: " + username + " " + password);
@@ -62,15 +59,18 @@ router.post('/login', (req, res) => {
         if (hashedPassword == dbhashed) {
             console.log("logging in");
             //res.json(login_true_response);
-            res.redirect("/play");
+            //4. generate jwt token
+            const token = jwt.sign({ username: username, password: hashedPassword }, process.env.JWT_SECRET, { expiresIn: "1h" });
+            res.cookie("token", token, {
+                // httpOnly: true,
+                // secure: true,
+                // maxAge: 1000000,
+                // signed: true
+            });
+            res.json(login_true_response);
         } else {
             console.log("failed to log in");
-            res.json(login_false_response);
-        }
-        //4. if true, log in (todo: jwt token)
-        if (hashedPassword == dbhashed) {
-            const generatedToken = JWTTokenDice(username, password, salted);
-            console.log(generatedToken);
+            return res.json(login_false_response);
         }
     });
 });
@@ -78,7 +78,7 @@ router.post('/login', (req, res) => {
 /**
  * Register user / Create new user in db
  */
-router.post('/register', (req, res) => {
+router.post('/register', checkJWTExists, (req, res) => {
     //0. get the credentials from the post request
     const { first_name, last_name, username, password } = req.body;
     const salty = generateRandomSecret();

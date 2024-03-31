@@ -1,6 +1,6 @@
 const crypto = require('crypto-js');
 const crypto1 = require('crypto');
-const token = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 
 // Pass sha3 encryption salted to user password via the following function
 function SHA3hashPassword(secretpass, salt) {
@@ -8,15 +8,8 @@ function SHA3hashPassword(secretpass, salt) {
     return crypto.SHA3(concatPass).toString(crypto.enc.Hex);
 }
 
-// Creation of JWT token based on the username, hashed password and salt
-function JWTTokenDice(username, secretpass, salt) {
-    const hashed_password = SHA3hashPassword(secretpass, salt);
-    const jwt = token.sign({ username: username, password: hashed_password }, "The secret key", { expiresIn: '5m'});
-    return jwt;
-}
-
 // Create a random salt as an extra measure to the password encryption
-function generateRandomSecret(size=32) {
+function generateRandomSecret(size = 32) {
     return crypto1
         .randomBytes(size)
         .toString('base64')
@@ -35,4 +28,38 @@ function AESDecryptHashedPass(cipher_secret, skey) {
     return originText;
 }
 
-module.exports = { SHA3hashPassword, JWTTokenDice, generateRandomSecret, AESEncryptHashedPass, AESDecryptHashedPass };
+//
+function checkJWTForPlay(req, res, next) {
+    const token = req.cookies.token;
+    try {
+        const user = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = user;
+        next();
+    } catch (err) {
+        res.clearCookie("token");
+        return res.redirect("/auth")
+    }
+}
+
+function checkJWTExists(req, res, next) {
+    const token = req.cookies.token;
+    if (token != undefined) {
+        return res.redirect("/play");
+    }
+    try {
+        jwt.verify(token, process.env.JWT_SECRET);
+        return res.redirect("/play");
+    } catch (err) {
+        //console.log(err);
+        next();
+    }
+}
+
+module.exports = {
+    SHA3hashPassword,
+    generateRandomSecret,
+    AESEncryptHashedPass,
+    AESDecryptHashedPass,
+    checkJWTForPlay,
+    checkJWTExists
+};

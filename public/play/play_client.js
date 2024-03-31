@@ -1,5 +1,5 @@
 
-const DICE_MAX = 7;
+const DICE_MAX = 6;
 const DICE_MIN = 1;
 
 function hash() {
@@ -7,7 +7,7 @@ function hash() {
 }
 
 function rollDice() {
-    return Math.floor(Math.random() * (DICE_MAX - DICE_MIN) + DICE_MIN);
+    return Math.floor(Math.random() * (DICE_MAX - DICE_MIN + 1) + DICE_MIN);
 }
 
 function generateRandomSecret(size = 20) {

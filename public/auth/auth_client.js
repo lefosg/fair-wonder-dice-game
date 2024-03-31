@@ -21,6 +21,8 @@ async function login() {
             if (r.auth == false) {
                 document.getElementById('login_password').value = "";
                 alert(r.msg);
+            } else {
+                window.location.href = 'https://localhost:8443/play';
             }
         })
         .catch(err => console.log(err));

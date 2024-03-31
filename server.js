@@ -4,6 +4,7 @@ const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const path = require('path');
+const cookieParser = require("cookie-parser");
 require('dotenv').config();
 
 // Initialization
@@ -19,6 +20,8 @@ const DOMAIN = process.env.DOMAIN
 const httpServer = http.createServer(app);
 const httpsServer = https.createServer(credentials, app);
 
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(express.static(path.join(__dirname, './public')));
 app.use(express.json());
 //print type of request and url in every request, todo: log instead of print
@@ -56,86 +59,3 @@ httpServer.listen(HTTP_PORT, () => {
 httpsServer.listen(HTTPS_PORT, () => {
     console.log("HTTPS server listening on https://" + DOMAIN + ":" + HTTPS_PORT)
 });
-
-/**
- * DATABASE
-*/
-// process.exit() is utilized to terminate the code in case of failure
-// mysqlconn.connect(function (error) {
-//     if (error) {
-//         console.log("Couldn't connect :(Error: " + error);
-//         process.exit(1);
-//     } else {
-//         console.log("Connected successfully to GDPR Database!!!");
-
-//         // Inserting new users into the GDPR Database 
-//         // The ignore syntax is utilized with insert in order to avoid inserting duplicate values in our GDPR Database (with the use of Prepared Statements to prevent SQL Injection)
-//         // Return all the values from the GDPR Database
-//         // First salt
-//         const firstsalt = RandomSalty();
-
-//         // Passwords entered by the first user
-//         const userpassword = SHA3hashPassword('Pass123', firstsalt);
-
-//         var sqlquery1 = `insert ignore into users(firstname, lastname, username, password, id) values('f3312307', 'AsoeSec', 'Kkostakis', ?, 1) on duplicate key update password = values(password)`;
-
-//         // Second salt
-//         const secondsalt = RandomSalty();
-
-//         // Passwords entered by the administrator
-//         const adminpassword = SHA3hashPassword('L$mD0wer1', secondsalt);
-
-//         var sqlquery2 = `insert ignore into users(firstname, lastname, username, password, id) values('Admini', 'Archibald', 'Administrator', ?, 2) on duplicate key update password = values(password)`;
-
-//         var sqlquery3 = `select * from users`;
-
-//         // Execute query#1
-//         mysqlconn.query(sqlquery1, [userpassword], (error, rows) => {
-//             if (error) {
-//                 console.error('There was an error when executing first query!!!: ' + error.stack);
-//                 process.exit(1);
-//             }
-//             else {
-//                 console.log("First User Query");
-//                 console.log(rows);
-//             }
-//         });
-
-//         // Execute query#2
-//         mysqlconn.query(sqlquery2, [adminpassword], (error, rows2) => {
-//             if (error) {
-//                 console.error('There was an error when executing second query!!!: ' + error.stack);
-//                 process.exit(1);
-//             }
-//             else {
-//                 console.log("Administrator Query");
-//                 console.log(rows2);
-//             }
-
-//             // Execute query#3
-//             mysqlconn.query(sqlquery3, (error, rows3) => {
-//                 if (error) {
-//                     console.error('There was an error when executing third query!!!: ' + error.stack);
-//                     process.exit(1);
-//                 }
-//                 else {
-//                     console.log("Return users from our gdpr database");
-//                     console.log(rows3);
-//                 }
-//             });
-
-//             // End the connection with our database in mysql
-//             /*mysqlconn.end(function (error) {
-//                 if (error) {
-//                     console.error("There was an issue with the closure process" + error.stack);
-//                     process.exit(1);
-//                 }
-//                 else {
-//                     console.log("The connection with Mysql has ended successfully!!!");
-//                 }
-//                 process.exit(1);
-//             }); */
-//         });
-
-//     }
-// });
