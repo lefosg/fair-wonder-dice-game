@@ -27,7 +27,7 @@ router.post('/login', (req, res) => {
 
     // Extra measures to further prevent SQL Injection Attempts like user input sanitization
     if (!inputValidate.isAlphanumeric(username)) {
-        return res.status(400).json({ error: "!!!Invalid username format!!!"});
+        return res.status(400).json({ error: "!!!Invalid username format!!!" });
     }
 
     if (/[-'"]/g.test(username)) {

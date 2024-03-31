@@ -4,9 +4,7 @@ const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const path = require('path');
-const mysqlconn = require('./database/db.js');
 require('dotenv').config();
-const { SHA3hashPassword, RandomSalty } = require('./helper.js');
 
 // Initialization
 const app = express();
