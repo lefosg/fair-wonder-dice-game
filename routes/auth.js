@@ -1,7 +1,8 @@
 const { Router } = require('express');
 const path = require('path');
 const mysqlconn = require('../database/db.js');
-const { sha3hash } = require('../helper.js');
+const { SHA3hashPassword } = require('../helper.js');
+const { StaticSalty } = require('../helper.js');
 
 const router = Router();
 
@@ -22,24 +23,32 @@ router.post('/login', (req, res) => {
     const { username, password } = req.body;
     console.log("Attempting login with credentials: " + username + " " + password);
 
-    //1. get user from database, TODOTODOTODOTODO: PREPARED STATEMENT + CHECK FOR SQL INJECTION IN HERE
-    mysqlconn.query(`SELECT password FROM users WHERE username='${username}'`, function (err, result, fields) {
-        if (err) throw err;
+    //1. get user from database, with the use of PreparedStatement as a measure against SQL Injection
+    mysqlconn.query(`SELECT password FROM users WHERE username=?`, [username], function (err, result, fields) {
+        if (err) 
+        {
+            console.error("There was an error in fetching the user from the database:", err);
+            return res.status(500).json({ error: "Error in fetching user from database!!!" });
+        }
         // console.log(result);
         //if no records where returned, the given username does not exist
         if (result.length == 0) {
             res.json(login_false_response);
             return;
         }
-        let stored_pass_hash = result[0].password;
-        //2. hash the given password
-        let password_hash = sha3hash(password);
-        console.log(password_hash);
-        console.log(stored_pass_hash);
-        //3. decrypt result.password that was retrieved from database
 
-        //4. check if (2.)hashed password == (3.)decrypted password
-        if (password_hash == stored_pass_hash) {
+        //2. Retrieve the hashed password and the according salt from the database for the aforesaid user
+        const stored_pass_hash = result[0].password;
+        const dbhashed = Buffer.from(stored_pass_hash, 'binary').toString('utf8');
+        const salted = StaticSalty();
+        console.log(dbhashed);
+        console.log(salted);
+
+        //3. hash the given password with the salt
+        const hashedPassword = SHA3hashPassword(password, salted);
+
+        //3. check if (1.)hashed password == (2.)password given by the user
+        if (hashedPassword == dbhashed) {
             console.log("logging in");
             res.json(login_true_response);
         } else {
@@ -56,9 +65,10 @@ router.post('/login', (req, res) => {
 router.post('/register', (req, res) => {
     //0. get the credentials from the post request
     const { first_name, last_name, username, password } = req.body;
+    const salty = StaticSalty();
 
     //1. check if user already in db, if exists, throw error
-    mysqlconn.query(`SELECT * FROM users WHERE username='${username}'`, (err, result, fields) => {
+    mysqlconn.query(`SELECT * FROM users WHERE username=?`, [username], (err, result, fields) => {
         if (err) throw err;
         //if the result array has one (or more?) elements, the username exists
         if (result.length > 0) {
@@ -66,13 +76,16 @@ router.post('/register', (req, res) => {
         } else {
             //2. if not exists, insert user into db
             //2.a. hash and encrypt the password
-            let hashed_password = sha3hash(password);
-            //2.b. store the password
-            mysqlconn.query(`INSERT INTO users (firstname, lastname, username, password) 
-                    VALUES('${first_name}', '${last_name}', '${username}', '${hashed_password}')`, (err, result, fields) => {
+            const hashed_password = SHA3hashPassword(password, salty);
+            //2.b. store the password with the use of Prepared Statement as a measure against SQL Injection
+            mysqlconn.query(`INSERT INTO users (firstname, lastname, username, password, salt) 
+                    VALUES(?, ?, ?, ?, ?)`, [first_name, last_name, username, hashed_password, salty], (err, result, fields) => {
 
-                if (err) throw err;
-                console.log("Registered");
+                if (err) {
+                    console.error("There was an error in registering user:", err);
+                    return res.status(500).json({ error: "User registration failed!!!" });
+                }
+                console.log("The user was registered successfully!!!");
                 return res.json(register_true_response);
             });
         }
