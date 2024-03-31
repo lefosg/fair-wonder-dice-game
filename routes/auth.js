@@ -41,7 +41,8 @@ router.post('/login', (req, res) => {
         //4. check if (2.)hashed password == (3.)decrypted password
         if (password_hash == stored_pass_hash) {
             console.log("logging in");
-            res.json(login_true_response);
+            //res.json(login_true_response);
+            res.redirect("/play");
         } else {
             console.log("failed to log in");
             res.json(login_false_response);
