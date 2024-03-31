@@ -49,7 +49,7 @@ async function register() {
     })
         .then(r => r.json())
         .then(r => {
-            if (r.reg == true) {
+            if (r.auth == true) {
                 clearRegisterForm();
                 show_login();
             } else {

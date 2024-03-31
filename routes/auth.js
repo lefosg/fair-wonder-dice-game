@@ -10,8 +10,10 @@ const router = Router();
 
 const login_true_response = { auth: true, msg: "logged in" };
 const login_false_response = { auth: false, msg: "username or password invalid" };
-const register_true_response = { reg: true, msg: "registered" };
-const register_false_response = { reg: false, msg: "username taken" };
+const register_true_response = { auth: true, msg: "registered" };
+const register_false_response = { auth: false, msg: "username taken" };
+const invalid_uname_format = { auth: false, msg: "!!!Invalid username format!!!" };
+const bad_characters = { auth: false, msg: "Username cannot contain symbols like '-' or single quote or double quote!!!" };
 
 router.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/auth/login_register.html'));
@@ -27,19 +29,14 @@ router.post('/login', (req, res) => {
 
     // Extra measures to further prevent SQL Injection Attempts like user input sanitization
     if (!inputValidate.isAlphanumeric(username)) {
-        return res.status(400).json({ error: "!!!Invalid username format!!!" });
-    }
-
-    if (/[-'"]/g.test(username)) {
-        return res.status(400).json({ error: "Username cannot contain symbols like '-' or single quote or double quote!!!" });
+        return res.json(invalid_uname_format);
     }
 
     //1. get user from database, with the use of PreparedStatement as a measure against SQL Injection
     mysqlconn.query(`SELECT password FROM users WHERE username=?`, [username], function (err, result, fields) {
-        if (err) 
-        {
+        if (err) {
             console.error("There was an error in fetching the user from the database:", err);
-            return res.status(500).json({ error: "Error in fetching user from database!!!" });
+            return res.json({ msg: "Error in fetching user from database!!!" });
         }
         // console.log(result);
         //if no records where returned, the given username does not exist
@@ -83,11 +80,7 @@ router.post('/register', (req, res) => {
 
     // Extra measures to further prevent SQL Injection Attempts like user input sanitization
     if (!inputValidate.isAlphanumeric(username)) {
-        return res.status(400).json({ error: "!!!Invalid username format!!!"});
-    }
-
-    if (/[-'"]/g.test(username)) {
-        return res.status(400).json({ error: "Username must not contain malformed characters such as '-' or single quote or double quote!!!" });
+        return res.json(bad_characters);
     }
 
     //1. check if user already in db, if exists, throw error (Prepared Statements)
@@ -106,7 +99,7 @@ router.post('/register', (req, res) => {
 
                 if (err) {
                     console.error("There was an error in registering user:", err);
-                    return res.status(500).json({ error: "User registration failed!!!" });
+                    return res.json(register_false_response);
                 }
                 console.log("The user was registered successfully!!!");
                 return res.json(register_true_response);
