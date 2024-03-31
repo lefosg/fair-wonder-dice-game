@@ -1,4 +1,5 @@
 const crypto = require('crypto-js');
+const token = require('jsonwebtoken');
 
 // Pass sha3 encryption salted to user password via the following function
 function SHA3hashPassword(secretpass, salt) {
@@ -12,4 +13,12 @@ function StaticSalty() {
     return staticsalt;
 }
 
-module.exports = { SHA3hashPassword, StaticSalty };
+// Creation of JWT token based on the username, hashed password and salt
+function JWTTokenDice(username, secretpass, salt) {
+    const hashed_password = SHA3hashPassword(secretpass, salt);
+    const jwt = token.sign({ username: username, password: hashed_password }, "The secret key", { expiresIn: '5m'});
+    return jwt;
+}
+
+
+module.exports = { SHA3hashPassword, StaticSalty, JWTTokenDice };

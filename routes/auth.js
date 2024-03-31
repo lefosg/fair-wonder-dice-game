@@ -3,6 +3,7 @@ const path = require('path');
 const mysqlconn = require('../database/db.js');
 const { SHA3hashPassword } = require('../helper.js');
 const { StaticSalty } = require('../helper.js');
+const { JWTTokenDice } = require('../helper.js');
 
 const router = Router();
 
@@ -55,7 +56,11 @@ router.post('/login', (req, res) => {
             console.log("failed to log in");
             res.json(login_false_response);
         }
-        //5. if true, log in (todo: jwt token)
+        //4. if true, log in (todo: jwt token)
+        if (hashedPassword == dbhashed) {
+            const generatedToken = JWTTokenDice(username, password, salted);
+            console.log(generatedToken);
+        }
     });
 });
 
