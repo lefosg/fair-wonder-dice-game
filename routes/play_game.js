@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const path = require('path');
 const { sha3hash } = require('../helper.js');
+const { generateRandomSecret } = require('../helper.js');
 
 const router = Router();
 
@@ -10,13 +11,6 @@ DICE_MIN = 1;
 // Internal functions
 function rollDice() {
     return Math.floor(Math.random() * (DICE_MAX - DICE_MIN) + DICE_MIN);
-}
-
-function generateRandomSecret(size = 20) {
-    return Crypto
-        .randomBytes(size)
-        .toString('base64')
-        .slice(0, size)
 }
 
 /**
