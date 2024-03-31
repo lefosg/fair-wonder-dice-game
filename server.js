@@ -20,23 +20,25 @@ const DOMAIN = process.env.DOMAIN
 const httpServer = http.createServer(app);
 const httpsServer = https.createServer(credentials, app);
 
+// Redirect HTTP to HTTPS
+app.use(function (req, res, next) {
+    if (!req.secure) {
+        return res.redirect("https://" + DOMAIN + ":" + HTTPS_PORT + req.originalUrl);
+    }
+    next();
+});
+
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, './public')));
 app.use(express.json());
-//print type of request and url in every request, todo: log instead of print
+
+//Print type of request and url in every request
 app.use((request, response, next) => {
     console.log(request.method, request.url);
     next();
 });
 
-// Redirect HTTP to HTTPS
-app.use(function (req, res, next) {
-    if (process.env.NODE_ENV != 'development' && !req.secure) {
-        return res.redirect("https://" + DOMAIN + ":" + HTTPS_PORT + req.url);
-    }
-    next();
-});
 
 // Game route
 const game_route = require('./routes/play_game.js');

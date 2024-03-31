@@ -99,10 +99,10 @@ router.post('/register', checkJWTExists, (req, res) => {
     const salty = generateRandomSecret();
     // const enc_salty = AESEncryptHashedPass(salty, salt_key);
 
+    //check for empty fields
     if (first_name.trim() == "" || last_name.trim() == "" || username.trim() == "" || password.trim() == "") {
         return res.json(empty_fields);
     }
-
 
     // Extra measures to further prevent SQL Injection Attempts like user input sanitization
     if (!inputValidate.isAlphanumeric(username)) {

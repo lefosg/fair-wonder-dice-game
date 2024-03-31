@@ -5,7 +5,7 @@ async function login() {
     let pword = document.getElementById('login_password').value;
 
     //send credentials to server
-    fetch('https://localhost:8443/auth/login', {
+    fetch(window.location.origin + '/auth/login', {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
@@ -22,7 +22,7 @@ async function login() {
                 document.getElementById('login_password').value = "";
                 alert(r.msg);
             } else {
-                window.location.href = 'https://localhost:8443/play';
+                window.location.href = window.location.origin + '/play';
             }
         })
         .catch(err => console.log(err));
@@ -36,7 +36,7 @@ async function register() {
     let pword = document.getElementById('register_password').value;
 
     //send credentials to server
-    fetch('https://localhost:8443/auth/register', {
+    fetch(window.location.origin + '/auth/register', {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
