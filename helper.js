@@ -1,16 +1,11 @@
 const crypto = require('crypto-js');
+const crypto1 = require('crypto');
 const token = require('jsonwebtoken');
 
 // Pass sha3 encryption salted to user password via the following function
 function SHA3hashPassword(secretpass, salt) {
     const concatPass = secretpass + salt;
     return crypto.SHA3(concatPass).toString(crypto.enc.Hex);
-}
-
-// Create a salt as an extra measure to the password encryption
-function StaticSalty() {
-    const staticsalt = '1c9af59c1d8d93b7f26633c706919dac';
-    return staticsalt;
 }
 
 // Creation of JWT token based on the username, hashed password and salt
@@ -20,5 +15,24 @@ function JWTTokenDice(username, secretpass, salt) {
     return jwt;
 }
 
+// Create a random salt as an extra measure to the password encryption
+function generateRandomSecret(size=32) {
+    return crypto1
+        .randomBytes(size)
+        .toString('base64')
+        .slice(0, size)
+}
 
-module.exports = { SHA3hashPassword, StaticSalty, JWTTokenDice };
+// Encryption process for password 
+function AESEncryptHashedPass(hashed_secret, skey) {
+    return crypto.AES.encrypt(hashed_secret, skey).toString(crypto.enc.Utf8);
+}
+
+// Decryption Process for password
+function AESDecryptHashedPass(cipher_secret, skey) {
+    const helper = crypto.AES.decrypt(cipher_secret, skey);
+    const originText = helper.toString(crypto.enc.Utf8);
+    return originText;
+}
+
+module.exports = { SHA3hashPassword, JWTTokenDice, generateRandomSecret, AESEncryptHashedPass, AESDecryptHashedPass };

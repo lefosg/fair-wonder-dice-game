@@ -1,13 +1,18 @@
+require('dotenv').config();
+
 const { Router } = require('express');
 const path = require('path');
 const mysqlconn = require('../database/db.js');
 const { SHA3hashPassword } = require('../helper.js');
-const { StaticSalty } = require('../helper.js');
+const { generateRandomSecret } = require('../helper.js');
 const { JWTTokenDice } = require('../helper.js');
+const { AESEncryptHashedPass } = require('../helper.js');
+const { AESDecryptHashedPass } = require('../helper.js');
 const inputValidate = require('validator');
 
 const router = Router();
-
+const pass_key = process.env.PASSWORD_KEY;
+const salt_key = process.env.SALT_KEY;
 const login_true_response = { auth: true, msg: "logged in" };
 const login_false_response = { auth: false, msg: "username or password invalid" };
 const register_true_response = { auth: true, msg: "registered" };
@@ -33,7 +38,7 @@ router.post('/login', (req, res) => {
     }
 
     //1. get user from database, with the use of PreparedStatement as a measure against SQL Injection
-    mysqlconn.query(`SELECT password FROM users WHERE username=?`, [username], function (err, result, fields) {
+    mysqlconn.query(`SELECT password, salt FROM users WHERE username=?`, [username], function (err, result, fields) {
         if (err) {
             console.error("There was an error in fetching the user from the database:", err);
             return res.json({ msg: "Error in fetching user from database!!!" });
@@ -48,7 +53,7 @@ router.post('/login', (req, res) => {
         //2. Retrieve the hashed password and the according salt from the database for the aforesaid user
         const stored_pass_hash = result[0].password;
         const dbhashed = Buffer.from(stored_pass_hash, 'binary').toString('utf8'); // Utilized to convert the varbinary type in MySQL to binary and then to string
-        const salted = StaticSalty();
+        const salted = result[0].salt;
 
         //3. hash the given password with the salt
         const hashedPassword = SHA3hashPassword(password, salted);
@@ -76,7 +81,9 @@ router.post('/login', (req, res) => {
 router.post('/register', (req, res) => {
     //0. get the credentials from the post request
     const { first_name, last_name, username, password } = req.body;
-    const salty = StaticSalty();
+    const salty = generateRandomSecret();
+    // const enc_salty = AESEncryptHashedPass(salty, salt_key);
+
 
     // Extra measures to further prevent SQL Injection Attempts like user input sanitization
     if (!inputValidate.isAlphanumeric(username)) {
@@ -93,6 +100,7 @@ router.post('/register', (req, res) => {
             //2. if not exists, insert user into db
             //2.a. hash and encrypt the password
             const hashed_password = SHA3hashPassword(password, salty);
+            // const enc_hashed_password = AESEncryptHashedPass(hashed_password, pass_key)
             //2.b. store the password with the use of Prepared Statement as a measure against SQL Injection
             mysqlconn.query(`INSERT INTO users (firstname, lastname, username, password, salt) 
                     VALUES(?, ?, ?, ?, ?)`, [first_name, last_name, username, hashed_password, salty], (err, result, fields) => {
