@@ -4,9 +4,7 @@ const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const path = require('path');
-const mysqlconn = require('./database/db.js');
 require('dotenv').config();
-const { SHA3hashPassword, RandomSalty } = require('./helper.js');
 
 // Initialization
 const app = express();
@@ -48,6 +46,15 @@ app.use('/auth', auth_route);
 // Index api is here, don't make route for it
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '/index.html'));
+});
+
+// Spin the server
+httpServer.listen(HTTP_PORT, () => {
+    console.log("HTTP server listening on http://" + DOMAIN + ":" + HTTP_PORT)
+});
+
+httpsServer.listen(HTTPS_PORT, () => {
+    console.log("HTTPS server listening on https://" + DOMAIN + ":" + HTTPS_PORT)
 });
 
 /**
@@ -132,12 +139,3 @@ app.get('/', (req, res) => {
 
 //     }
 // });
-
-// Spin the server
-httpServer.listen(HTTP_PORT, () => {
-    console.log("HTTP server listening on http://" + DOMAIN + ":" + HTTP_PORT)
-});
-
-httpsServer.listen(HTTPS_PORT, () => {
-    console.log("HTTPS server listening on https://" + DOMAIN + ":" + HTTPS_PORT)
-});
