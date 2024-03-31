@@ -10,13 +10,23 @@ const jwt = require('jsonwebtoken');
 const router = Router();
 const pass_key = process.env.PASSWORD_KEY;
 const salt_key = process.env.SALT_KEY;
+
+//Replies for authentication attempts
 const login_true_response = { auth: true, msg: "logged in" };
 const login_false_response = { auth: false, msg: "username or password invalid" };
 const register_true_response = { auth: true, msg: "registered" };
 const register_false_response = { auth: false, msg: "username taken" };
 const invalid_uname_format = { auth: false, msg: "!!!Invalid username format!!!" };
 const bad_characters = { auth: false, msg: "Username cannot contain symbols like '-' or single quote or double quote!!!" };
+const bad_password_length = { auth: false, msg: "Password length must be at least 6" };
+const empty_fields = { auth: false, msg: "Fields must not be empty" };
 
+
+//Endpoints
+
+/**
+ * Get the login and register page
+ */
 router.get('/', checkJWTExists, (req, res) => {
     res.sendFile(path.join(__dirname, '../public/auth/login_register.html'));
 });
@@ -28,6 +38,11 @@ router.post('/login', checkJWTExists, (req, res) => {
     //0. get the credentials from the post request
     const { username, password } = req.body;
     console.log("Attempting login with credentials: " + username + " " + password);
+
+    //check for empty fields
+    if (username.trim() == "" || password.trim() == "") {
+        return res.json(empty_fields);
+    }
 
     // Extra measures to further prevent SQL Injection Attempts like user input sanitization
     if (!inputValidate.isAlphanumeric(username)) {
@@ -84,10 +99,18 @@ router.post('/register', checkJWTExists, (req, res) => {
     const salty = generateRandomSecret();
     // const enc_salty = AESEncryptHashedPass(salty, salt_key);
 
+    if (first_name.trim() == "" || last_name.trim() == "" || username.trim() == "" || password.trim() == "") {
+        return res.json(empty_fields);
+    }
+
 
     // Extra measures to further prevent SQL Injection Attempts like user input sanitization
     if (!inputValidate.isAlphanumeric(username)) {
         return res.json(bad_characters);
+    }
+
+    if (password.length < 6) {
+        return res.json(bad_password_length);
     }
 
     //1. check if user already in db, if exists, throw error (Prepared Statements)
