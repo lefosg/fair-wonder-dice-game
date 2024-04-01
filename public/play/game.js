@@ -15,13 +15,13 @@ function dicegame(){
     img2.setAttribute("src",diceLocation2);
 
     if (randomDice > randomDice2){
-        document.querySelector("h1").innerHTML="🏆 Player 1 Win!";
+        document.querySelector("h1").innerHTML="🏅🎲 Player 1 Win!";
     }
     else if (randomDice < randomDice2){
-        document.querySelector("h1").innerHTML="Player 2 Win! 🏆";
+        document.querySelector("h1").innerHTML="Player 2 Win! 🏅🎲 ";
     }
     else if (randomDice = randomDice2){
-        document.querySelector("h1").innerHTML="🏆 Match Draw! 🏆";
+        document.querySelector("h1").innerHTML="🏅🎲 Match Draw! 🎲🏅";
     }
         else{
             document.querySelector("h1").innerHTML="Something Error...";

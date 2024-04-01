@@ -12,21 +12,22 @@ body{
     background-repeat: no-repeat;
     color: rgb(236, 226, 226);  
     background-size: cover;
+    backdrop-filter: blur(7px);
     
 }
 
 .dice {
     display: block;
-    position: relative
-   
+    position: relative;
 }
 
 .row {
     display: flex;
     column-gap: 20px;
+    color: white;
 }
 .col-6{
-    width: 70%;
+    width: 50%;
 }
 .img.dice{
     border-radius: 24px;
@@ -43,6 +44,7 @@ button{
     font-size: 22px;
     text-transform: uppercase;
     cursor: pointer;
+    color: red;
 }
 button:hover{
     color: rgb(1, 25, 17);
