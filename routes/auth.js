@@ -21,6 +21,8 @@ const invalid_uname_format = { auth: false, msg: "!!!Invalid username format!!!"
 const bad_characters = { auth: false, msg: "Username cannot contain symbols like '-' or single quote or double quote!!!" };
 const bad_password_length = { auth: false, msg: "Password length must be at least 6" };
 const empty_fields = { auth: false, msg: "Fields must not be empty" };
+const logout_successful = { logout: true, msg: "logged out successfully" };
+const logout_failed = { logout: true, msg: "log out failed" };
 
 
 //Endpoints
@@ -78,7 +80,7 @@ router.post('/login', checkJWTExists, (req, res) => {
             console.log("logging in");
             //res.json(login_true_response);
             //4. generate jwt token
-            const token = jwt.sign({ username: username, password: enc_hash_pass }, process.env.JWT_SECRET, { expiresIn: "10s" });
+            const token = jwt.sign({ username: username, password: enc_hash_pass }, process.env.JWT_SECRET, { expiresIn: "1h" });
             res.cookie("token", token, {
                 // httpOnly: true,
                 // secure: true,
@@ -146,6 +148,42 @@ router.post('/register', checkJWTExists, (req, res) => {
             });
         }
     });
+});
+
+/**
+ * Logout the user
+ */
+router.post('/logout', (req, res) => {
+    const token = req.cookies.token;
+    //if no token is sent, redirect to auth page
+    if (token == undefined) {
+        return res.json(logout_failed);
+    }
+    console.log(token.length);
+    try {
+        jwt.verify(token, process.env.JWT_SECRET);
+        mysqlconn.query(`SELECT token FROM jwt_blacklist WHERE token=?`, [token], (err, result, fields) => {
+            if (err) throw err;
+            console.log(result);
+            //if no results where returned, this jwt is not blacklisted, so, blacklist it and logout the user
+            if (result.length == 0) {
+                //save the jwt
+                mysqlconn.query(`INSERT INTO jwt_blacklist(token) VALUES(?)`, [token], (err, result, fields) => {
+                    if (err) throw err;
+                    res.clearCookie("token");
+                    res.json(logout_successful);
+                });
+
+            } else {
+                res.clearCookie("token");
+                res.setHeader('Clear-Site-Data', '"cookies"');
+                return res.json(logout_successful);
+            }
+        });
+    } catch (err) {
+        console.log(err);
+        return res.json(logout_failed);
+    }
 });
 
 module.exports = router;

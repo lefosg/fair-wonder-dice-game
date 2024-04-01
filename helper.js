@@ -1,6 +1,7 @@
 const crypto = require('crypto-js');
 const crypto1 = require('crypto');
 const jwt = require('jsonwebtoken');
+const mysqlconn = require('./database/db.js')
 
 // Pass sha3 encryption salted to user password via the following function
 function SHA3hashPassword(secretpass, salt) {
@@ -18,7 +19,7 @@ function generateRandomSecret(size = 32) {
 
 // Create Initialization Vector for AES-256 Encryption
 function initializeVector() {
-    return crypto1.randomBytes(16); 
+    return crypto1.randomBytes(16);
 }
 
 // Create the encryption key utilized for the AES
@@ -39,7 +40,7 @@ function AESEncryptHashedPass(hashed_secret, skey, vector) {
 function AESDecryptHashedPass(encPass, skey, vector) {
     const decipheredData = crypto1.createDecipheriv('aes-256-cbc', skey, vector);
     let decryptedData = decipheredData.update(encPass, 'base64', 'utf8');
-    decryptedData+= decipheredData.final('utf8');
+    decryptedData += decipheredData.final('utf8');
     return decryptedData;
 }
 
