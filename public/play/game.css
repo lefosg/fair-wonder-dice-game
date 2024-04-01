@@ -1,12 +1,13 @@
 /* POPPINS FONT */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+@import url(https://fonts.googleapis.com/css?family=Oswald:400);
 
 
 body{
     background: url("./img/002 copy.jpg");
     font-family: 'Poppins', sans-serif;
     text-align: center;
-    height: 100vh;
+    height: 95vh;
     position: relative;
     overflow: hidden;
     background-repeat: no-repeat;
@@ -49,3 +50,64 @@ button{
 button:hover{
     color: rgb(1, 25, 17);
 }
+
+.two-col{
+    display: flex;
+    justify-content: center;
+    color: whitesmoke;
+    font-size: large;
+    margin-top: 25px;
+    font-family: 'Poppins', sans-serif;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.navigation {
+    width: 100%;
+    background-color: black;
+  }
+  
+  .logout {
+    font-size: .8em;
+    font-family: 'Oswald', sans-serif;
+      position: relative;
+    right: -18px;
+    bottom: -4px;
+    overflow: hidden;
+    letter-spacing: 3px;
+    opacity: 0;
+    transition: opacity .45s;
+    -webkit-transition: opacity .35s;
+    
+  }
+  
+  .button {
+    text-decoration: none;
+    float: right;
+    padding: 12px;
+    margin: 15px;
+    color: black;
+    width: 25px;
+    background-color: rgb(19, 161, 116);
+    transition: width .35s;
+    -webkit-transition: width .25s;
+    overflow: hidden;
+  }
+  
+  a:hover {
+    width: 100px;
+  }
+  
+  a:hover .logout{
+    opacity: .9;
+  }
+  
+  a {
+    text-decoration: none;
+  }
+  
+
+
+  
+  
+
