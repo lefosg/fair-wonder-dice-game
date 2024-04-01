@@ -164,7 +164,6 @@ router.post('/logout', (req, res) => {
         jwt.verify(token, process.env.JWT_SECRET);
         mysqlconn.query(`SELECT token FROM jwt_blacklist WHERE token=?`, [token], (err, result, fields) => {
             if (err) throw err;
-            console.log(result);
             //if no results where returned, this jwt is not blacklisted, so, blacklist it and logout the user
             if (result.length == 0) {
                 //save the jwt
