@@ -18,7 +18,7 @@ function rollDice() {
  */
 // Router has prefix /play, so this endpoint is /play/
 router.get('/', checkJWTForPlay, (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/play/play.html'));
+    res.sendFile(path.join(__dirname, '../public/play/game.html'));
 });
 
 
