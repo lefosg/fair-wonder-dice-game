@@ -3,13 +3,14 @@ require('dotenv').config();
 const { Router } = require('express');
 const path = require('path');
 const mysqlconn = require('../database/db.js');
-const { SHA3hashPassword, generateRandomSecret, checkJWTExists, AESEncryptHashedPass, AESDecryptHashedPass } = require('../helper.js');
+const { SHA3hashPassword, generateRandomSecret, checkJWTExists, AESEncryptHashedPass, AESDecryptHashedPass, initializeVector, createEncKey } = require('../helper.js');
 const inputValidate = require('validator');
 const jwt = require('jsonwebtoken');
+const { create } = require('domain');
 
 const router = Router();
-const pass_key = process.env.PASSWORD_KEY;
-const salt_key = process.env.SALT_KEY;
+//const pass_key = process.env.PASSWORD_KEY;
+//const salt_key = process.env.SALT_KEY;
 
 //Replies for authentication attempts
 const login_true_response = { auth: true, msg: "logged in" };
@@ -50,7 +51,7 @@ router.post('/login', checkJWTExists, (req, res) => {
     }
 
     //1. get user from database, with the use of PreparedStatement as a measure against SQL Injection
-    mysqlconn.query(`SELECT password, salt FROM users WHERE username=?`, [username], function (err, result, fields) {
+    mysqlconn.query(`SELECT password, salt, vector, skey FROM users WHERE username=?`, [username], function (err, result, fields) {
         if (err) {
             console.error("There was an error in fetching the user from the database:", err);
             return res.json({ msg: "Error in fetching user from database!!!" });
@@ -62,20 +63,22 @@ router.post('/login', checkJWTExists, (req, res) => {
             return;
         }
 
-        //2. Retrieve the hashed password and the according salt from the database for the aforesaid user
-        const stored_pass_hash = result[0].password;
-        const dbhashed = Buffer.from(stored_pass_hash, 'binary').toString('utf8'); // Utilized to convert the varbinary type in MySQL to binary and then to string
+        //2. Retrieve the encrypted password and the according key, vector from the database for the aforesaid user
+        const stored_enc_pass_hash = result[0].password;
         const salted = result[0].salt;
+        const vector = result[0].vector;
+        const ekey = result[0].skey;
 
-        //3. hash the given password with the salt
-        const hashedPassword = SHA3hashPassword(password, salted);
+        // 3a. hash & encrypt the password given as user input with the encryption key and vector
+        const hashed_password = SHA3hashPassword(password, salted);
+        const enc_hash_pass = AESEncryptHashedPass(hashed_password, ekey, vector);
 
-        //3. check if (1.)hashed password == (2.)password given by the user
-        if (hashedPassword == dbhashed) {
+        //3b. check if (1.)encrypted password == (2.)password given by the user
+        if (enc_hash_pass == stored_enc_pass_hash) {
             console.log("logging in");
             //res.json(login_true_response);
             //4. generate jwt token
-            const token = jwt.sign({ username: username, password: hashedPassword }, process.env.JWT_SECRET, { expiresIn: "1h" });
+            const token = jwt.sign({ username: username, password: enc_hash_pass }, process.env.JWT_SECRET, { expiresIn: "10s" });
             res.cookie("token", token, {
                 // httpOnly: true,
                 // secure: true,
@@ -98,6 +101,12 @@ router.post('/register', checkJWTExists, (req, res) => {
     const { first_name, last_name, username, password } = req.body;
     const salty = generateRandomSecret();
     // const enc_salty = AESEncryptHashedPass(salty, salt_key);
+
+    // Initialized Vector AES
+    const vector = initializeVector();
+
+    // Encryption Key for AES
+    const skey = createEncKey();
 
     //check for empty fields
     if (first_name.trim() == "" || last_name.trim() == "" || username.trim() == "" || password.trim() == "") {
@@ -123,10 +132,10 @@ router.post('/register', checkJWTExists, (req, res) => {
             //2. if not exists, insert user into db
             //2.a. hash and encrypt the password
             const hashed_password = SHA3hashPassword(password, salty);
-            // const enc_hashed_password = AESEncryptHashedPass(hashed_password, pass_key)
+            const enc_hashed_password = AESEncryptHashedPass(hashed_password, skey, vector);
             //2.b. store the password with the use of Prepared Statement as a measure against SQL Injection
-            mysqlconn.query(`INSERT INTO users (firstname, lastname, username, password, salt) 
-                    VALUES(?, ?, ?, ?, ?)`, [first_name, last_name, username, hashed_password, salty], (err, result, fields) => {
+            mysqlconn.query(`INSERT INTO users (firstname, lastname, username, password, vector, skey, salt) 
+                    VALUES(?, ?, ?, ?, ?, ?, ?)`, [first_name, last_name, username, enc_hashed_password, vector, skey, salty], (err, result, fields) => {
 
                 if (err) {
                     console.error("There was an error in registering user:", err);

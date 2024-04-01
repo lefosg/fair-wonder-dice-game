@@ -16,16 +16,31 @@ function generateRandomSecret(size = 32) {
         .slice(0, size)
 }
 
-// Encryption process for password 
-function AESEncryptHashedPass(hashed_secret, skey) {
-    return crypto.AES.encrypt(hashed_secret, skey).toString(crypto.enc.Utf8);
+// Create Initialization Vector for AES-256 Encryption
+function initializeVector() {
+    return crypto1.randomBytes(16); 
+}
+
+// Create the encryption key utilized for the AES
+function createEncKey() {
+    return crypto1.randomBytes(32);
+}
+
+// Encryption process for password with AES
+function AESEncryptHashedPass(hashed_secret, skey, vector) {
+    const cipheredData = crypto1.createCipheriv('aes-256-cbc', skey, vector);
+    let encryptedData = cipheredData.update(hashed_secret, 'utf8', 'base64');
+    encryptedData += cipheredData.final('base64');
+    return encryptedData;
+    //return crypto.AES.encrypt(hashed_secret, skey).toString(crypto.enc.Utf8);
 }
 
 // Decryption Process for password
-function AESDecryptHashedPass(cipher_secret, skey) {
-    const helper = crypto.AES.decrypt(cipher_secret, skey);
-    const originText = helper.toString(crypto.enc.Utf8);
-    return originText;
+function AESDecryptHashedPass(encPass, skey, vector) {
+    const decipheredData = crypto1.createDecipheriv('aes-256-cbc', skey, vector);
+    let decryptedData = decipheredData.update(encPass, 'base64', 'utf8');
+    decryptedData+= decipheredData.final('utf8');
+    return decryptedData;
 }
 
 //
@@ -61,5 +76,7 @@ module.exports = {
     AESEncryptHashedPass,
     AESDecryptHashedPass,
     checkJWTForPlay,
-    checkJWTExists
+    checkJWTExists,
+    initializeVector,
+    createEncKey
 };
