@@ -15,6 +15,7 @@ const router = Router();
 //Replies for authentication attempts
 const login_true_response = { auth: true, msg: "logged in" };
 const login_false_response = { auth: false, msg: "username or password invalid" };
+const enc_false_response = { auth: false, msg: "Bad Encrypt" };
 const register_true_response = { auth: true, msg: "registered" };
 const register_false_response = { auth: false, msg: "username taken" };
 const invalid_uname_format = { auth: false, msg: "!!!Invalid username format!!!" };
@@ -53,7 +54,7 @@ router.post('/login', checkJWTExists, (req, res) => {
     }
 
     //1. get user from database, with the use of PreparedStatement as a measure against SQL Injection
-    mysqlconn.query(`SELECT password, salt, vector, skey FROM users WHERE username=?`, [username], function (err, result, fields) {
+    mysqlconn.query(`SELECT id, password FROM users WHERE username=?`, [username], function (err, result, fields) {
         if (err) {
             console.error("There was an error in fetching the user from the database:", err);
             return res.json({ msg: "Error in fetching user from database!!!" });
@@ -65,11 +66,20 @@ router.post('/login', checkJWTExists, (req, res) => {
             return;
         }
 
-        //2. Retrieve the encrypted password and the according key, vector from the database for the aforesaid user
+        //2. Retrieve the id, password from the database for the aforesaid user
+        const fid = result[0].id;
         const stored_enc_pass_hash = result[0].password;
-        const salted = result[0].salt;
-        const vector = result[0].vector;
-        const ekey = result[0].skey;
+
+        mysqlconn.query(`SELECT salt, vector, skey FROM sec_details WHERE user_id=?`, [fid], function (err, result, fields) {
+            if (err) {
+                console.error("There was an error in fetching the details from the database:", err);
+                return res.json({ msg: "Error in fetching details from database!!!" });
+            }
+
+            //2. Retrieve the according key, vector and salt from the database for the aforesaid user
+            const salted = result[0].salt;
+            const vector = result[0].vector;
+            const ekey = result[0].skey;
 
         // 3a. hash & encrypt the password given as user input with the encryption key and vector
         const hashed_password = SHA3hashPassword(password, salted);
@@ -93,6 +103,7 @@ router.post('/login', checkJWTExists, (req, res) => {
             return res.json(login_false_response);
         }
     });
+  });
 });
 
 /**
@@ -125,7 +136,7 @@ router.post('/register', checkJWTExists, (req, res) => {
     }
 
     //1. check if user already in db, if exists, throw error (Prepared Statements)
-    mysqlconn.query(`SELECT * FROM users WHERE username=?`, [username], (err, result, fields) => {
+    mysqlconn.query(`SELECT * FROM users WHERE username=?`, [username], function (err, result, fields) {
         if (err) throw err;
         //if the result array has one (or more?) elements, the username exists
         if (result.length > 0) {
@@ -136,16 +147,49 @@ router.post('/register', checkJWTExists, (req, res) => {
             const hashed_password = SHA3hashPassword(password, salty);
             const enc_hashed_password = AESEncryptHashedPass(hashed_password, skey, vector);
             //2.b. store the password with the use of Prepared Statement as a measure against SQL Injection
-            mysqlconn.query(`INSERT INTO users (firstname, lastname, username, password, vector, skey, salt) 
-                    VALUES(?, ?, ?, ?, ?, ?, ?)`, [first_name, last_name, username, enc_hashed_password, vector, skey, salty], (err, result, fields) => {
+            mysqlconn.query(`INSERT INTO users (firstname, lastname, username, password) 
+                    VALUES(?, ?, ?, ?)`, [first_name, last_name, username, enc_hashed_password], (err, result, fields) => {
 
                 if (err) {
                     console.error("There was an error in registering user:", err);
                     return res.json(register_false_response);
                 }
-                console.log("The user was registered successfully!!!");
-                return res.json(register_true_response);
-            });
+                else {
+
+                      // console.log(result);
+                        //if no records where returned, the given username does not exist
+                        if (result.length == 0) {
+                            res.json(login_false_response);
+                            return;
+                        }
+
+                       mysqlconn.query(`SELECT id FROM users WHERE username=?`, [username], function (err, result, fields) {
+                        if (err) {
+                            throw err;
+                        }
+                        else {
+
+                            const id = result[0].id;
+                            //2.b. store the password with the use of Prepared Statement as a measure against SQL Injection
+                            mysqlconn.query(`INSERT INTO sec_details (user_id, vector, salt, skey) 
+                            VALUES(?, ?, ?, ?)`, [id, vector, salty, skey], (err, result, fields) => {
+
+                            if (err) {
+                                console.error("!!!Bad Encryption!!!", err);
+                                return res.json(enc_false_response);
+                                }
+                                console.log("Success!!!");
+                                res.setHeader('Clear-Site-Data', '"cookies"');
+                                return res.json(register_true_response);
+
+                            });
+                       }
+
+                });
+
+            }
+          });
+
         }
     });
 });
