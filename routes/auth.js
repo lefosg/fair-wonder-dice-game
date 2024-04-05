@@ -81,29 +81,29 @@ router.post('/login', checkJWTExists, (req, res) => {
             const vector = result[0].vector;
             const ekey = result[0].skey;
 
-        // 3a. hash & encrypt the password given as user input with the encryption key and vector
-        const hashed_password = SHA3hashPassword(password, salted);
-        const enc_hash_pass = AESEncryptHashedPass(hashed_password, ekey, vector);
+            // 3a. hash & encrypt the password given as user input with the encryption key and vector
+            const hashed_password = SHA3hashPassword(password, salted);
+            const enc_hash_pass = AESEncryptHashedPass(hashed_password, ekey, vector);
 
-        //3b. check if (1.)encrypted password == (2.)password given by the user
-        if (enc_hash_pass == stored_enc_pass_hash) {
-            console.log("logging in");
-            //res.json(login_true_response);
-            //4. generate jwt token
-            const token = jwt.sign({ username: username, password: enc_hash_pass }, process.env.JWT_SECRET, { expiresIn: "1h" });
-            res.cookie("token", token, {
-                // httpOnly: true,
-                // secure: true,
-                // maxAge: 1000000,
-                // signed: true
-            });
-            res.json(login_true_response);
-        } else {
-            console.log("failed to log in");
-            return res.json(login_false_response);
-        }
+            //3b. check if (1.)encrypted password == (2.)password given by the user
+            if (enc_hash_pass == stored_enc_pass_hash) {
+                console.log("logging in");
+                //res.json(login_true_response);
+                //4. generate jwt token
+                const token = jwt.sign({ username: username, password: enc_hash_pass }, process.env.JWT_SECRET, { expiresIn: "1h" });
+                res.cookie("token", token, {
+                    // httpOnly: true,
+                    // secure: true,
+                    // maxAge: 1000000,
+                    // signed: true
+                });
+                res.json(login_true_response);
+            } else {
+                console.log("failed to log in");
+                return res.json(login_false_response);
+            }
+        });
     });
-  });
 });
 
 /**
@@ -156,14 +156,14 @@ router.post('/register', checkJWTExists, (req, res) => {
                 }
                 else {
 
-                      // console.log(result);
-                        //if no records where returned, the given username does not exist
-                        if (result.length == 0) {
-                            res.json(login_false_response);
-                            return;
-                        }
+                    // console.log(result);
+                    //if no records where returned, the given username does not exist
+                    if (result.length == 0) {
+                        res.json(login_false_response);
+                        return;
+                    }
 
-                       mysqlconn.query(`SELECT id FROM users WHERE username=?`, [username], function (err, result, fields) {
+                    mysqlconn.query(`SELECT id FROM users WHERE username=?`, [username], function (err, result, fields) {
                         if (err) {
                             throw err;
                         }
@@ -174,22 +174,19 @@ router.post('/register', checkJWTExists, (req, res) => {
                             mysqlconn.query(`INSERT INTO sec_details (user_id, vector, salt, skey) 
                             VALUES(?, ?, ?, ?)`, [id, vector, salty, skey], (err, result, fields) => {
 
-                            if (err) {
-                                console.error("!!!Bad Encryption!!!", err);
-                                return res.json(enc_false_response);
+                                if (err) {
+                                    console.error("!!!Bad Encryption!!!", err);
+                                    return res.json(enc_false_response);
                                 }
                                 console.log("Success!!!");
                                 res.setHeader('Clear-Site-Data', '"cookies"');
                                 return res.json(register_true_response);
 
                             });
-                       }
-
-                });
-
-            }
-          });
-
+                        }
+                    });
+                }
+            });
         }
     });
 });
@@ -203,7 +200,6 @@ router.post('/logout', (req, res) => {
     if (token == undefined) {
         return res.json(logout_failed);
     }
-    console.log(token.length);
     try {
         jwt.verify(token, process.env.JWT_SECRET);
         mysqlconn.query(`SELECT token FROM jwt_blacklist WHERE token=?`, [token], (err, result, fields) => {
