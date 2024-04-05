@@ -92,8 +92,8 @@ router.post('/login', checkJWTExists, (req, res) => {
             //4. generate jwt token
             const token = jwt.sign({ username: username, password: enc_hash_pass }, process.env.JWT_SECRET, { expiresIn: "1h" });
             res.cookie("token", token, {
-                // httpOnly: true,
-                // secure: true,
+                httpOnly: true, // Cookies are accessible only through http(s)
+                secure: true, // Only sent over https
                 // maxAge: 1000000,
                 // signed: true
             });
