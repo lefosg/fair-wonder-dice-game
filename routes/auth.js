@@ -6,7 +6,6 @@ const mysqlconn = require('../database/db.js');
 const { SHA3hashPassword, generateRandomSecret, checkJWTExists, AESEncryptHashedPass, AESDecryptHashedPass, initializeVector, createEncKey } = require('../helper.js');
 const inputValidate = require('validator');
 const jwt = require('jsonwebtoken');
-const { create } = require('domain');
 
 const router = Router();
 //const pass_key = process.env.PASSWORD_KEY;
@@ -24,6 +23,7 @@ const bad_password_length = { auth: false, msg: "Password length must be at leas
 const empty_fields = { auth: false, msg: "Fields must not be empty" };
 const logout_successful = { logout: true, msg: "logged out successfully" };
 const logout_failed = { logout: true, msg: "log out failed" };
+const blocked_user = { auth: false, msg: "This user has been blocked. Please contact our support department for further assistance!!!" };
 
 
 //Endpoints
@@ -35,6 +35,12 @@ router.get('/', checkJWTExists, (req, res) => {
     res.sendFile(path.join(__dirname, '../public/auth/login_register.html'));
 });
 
+// Mapping utilized for storing failed login attempts (lock the user in case of a brute force attack)
+const failedlogins = new Map();
+
+// Set utilized for storing blocked users (in case of a brute force attack)
+const blockList = new Set();
+
 /**
  * Authenticate user login
  */
@@ -43,7 +49,7 @@ router.post('/login', checkJWTExists, (req, res) => {
     const { username, password } = req.body;
     console.log("Attempting login with credentials: " + username + " " + password);
 
-    //check for empty fields
+        //check for empty fields
     if (username.trim() == "" || password.trim() == "") {
         return res.json(empty_fields);
     }
@@ -51,6 +57,19 @@ router.post('/login', checkJWTExists, (req, res) => {
     // Extra measures to further prevent SQL Injection Attempts like user input sanitization
     if (!inputValidate.isAlphanumeric(username)) {
         return res.json(invalid_uname_format);
+    }
+
+    // Measures taken against potential brute force attacks, check whether the current user has been blocked
+    if (blockList.has(username)) {
+        console.log("The login process has been disabled for user: " + username);
+        return res.json(blocked_user);
+    }
+
+    // Check if the maximum login attempts have been reached
+    if (failedlogins.has(username) && failedlogins.get(username) >= 3) {
+        console.log("The blocking process has begun for the user: " + username);
+        blockList.add(username);
+        return res.json(blocked_user);
     }
 
     //1. get user from database, with the use of PreparedStatement as a measure against SQL Injection
@@ -62,6 +81,7 @@ router.post('/login', checkJWTExists, (req, res) => {
         // console.log(result);
         //if no records where returned, the given username does not exist
         if (result.length == 0) {
+            failedlogins.set(username, (failedlogins.get(username) || 0) + 1);
             res.json(login_false_response);
             return;
         }
@@ -85,25 +105,25 @@ router.post('/login', checkJWTExists, (req, res) => {
             const hashed_password = SHA3hashPassword(password, salted);
             const enc_hash_pass = AESEncryptHashedPass(hashed_password, ekey, vector);
 
-            //3b. check if (1.)encrypted password == (2.)password given by the user
-            if (enc_hash_pass == stored_enc_pass_hash) {
-                console.log("logging in");
-                //res.json(login_true_response);
-                //4. generate jwt token
-                const token = jwt.sign({ username: username, password: enc_hash_pass }, process.env.JWT_SECRET, { expiresIn: "1h" });
-                res.cookie("token", token, {
-                    httpOnly: true, // Cookies are accessible only through http(s)
-                    secure: true, // Only sent over https
-                    // maxAge: 1000000,
-                    // signed: true
-                });
-                res.json(login_true_response);
-            } else {
-                console.log("failed to log in");
-                return res.json(login_false_response);
-            }
-        });
+        //3b. check if (1.)encrypted password == (2.)password given by the user
+        if (enc_hash_pass == stored_enc_pass_hash) {
+            console.log("logging in");
+            //res.json(login_true_response);
+            //4. generate jwt token
+            const token = jwt.sign({ username: username, password: enc_hash_pass }, process.env.JWT_SECRET, { expiresIn: "1h" });
+            res.cookie("token", token, {
+                httpOnly: true, // Cookies are accessible only through http(s)
+                secure: true, // Only sent over https
+                // maxAge: 1000000,
+                // signed: true
+            });
+            res.json(login_true_response);
+        } else {
+            console.log("failed to log in");
+            return res.json(login_false_response);
+        }
     });
+  });
 });
 
 /**
