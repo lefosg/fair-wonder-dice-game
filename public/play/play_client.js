@@ -166,7 +166,3 @@ async function play() {
     }
     console.log("========= GAME OVER =========");
 }
-
-function verifyHash(hash_stored, hash_received) {
-    h = sha256()
-}

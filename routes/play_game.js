@@ -70,19 +70,26 @@ router.post('/exchangeHashes', checkJWTForPlay, (req, res) => {
 /** Step 3
  * Gets the roll of the client and verifies it against the previously obtained hash
  */
-router.post('/exchangeRolls', checkJWTForPlay, (req, res) => {
+router.post('/exchangeRolls', checkJWTForPlay, async (req, res) => {
     opponent_roll = req.body.roll;
+    if (opponent_roll < DICE_MIN || opponent_roll > DICE_MAX) {
+        return res.json({ msg: "Invalid number for roll" });
+    }
     //IMPORTANT to verify: the order the client used to hash sha256(roll_output + opponent_binding_secret + binding_secret);
     //the "opponent_binding_secret" of the client is my secret (server's) and binding_secret the client's
     new_hash = sha256(opponent_roll + binding_secret + opponent_binding_secret);
     console.log("Hash produced by the client's roll: " + new_hash);
     if (new_hash == opponent_hash) {
         console.log("Hashes of client match");
-        //todo: search for user id 
-        let id = 1;
-        let timestamp = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
-        saveToMatchHistory(id, opponent_roll, roll_output, timestamp);  //save to history only if players where honest
-        return res.json({ roll: roll_output, msg: "Hashes match check with my roll now" });
+        try {
+            let id = await findUserId(req.user.username);
+            let timestamp = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
+            saveToMatchHistory(id, opponent_roll, roll_output, timestamp);  //save to history only if players where honest
+            return res.json({ roll: roll_output, msg: "Hashes match check with my roll now" });
+        } catch (err) {
+            console.log(err);
+            return res.json({ msg: "Could not find id of the user " + req.user.username });
+        }
     } else {
         console.log("Hashes do NOT match");
         return res.json({ roll: roll_output, msg: "No cheating here bro" });
@@ -98,6 +105,19 @@ function saveToMatchHistory(username, client_roll, server_roll, timestamp) {
             }
             console.log("Successfully saved match to database");
         });
+}
+
+function findUserId(username) {
+    return new Promise((resolve, reject) => {
+        mysqlconn.query('SELECT id FROM users WHERE username=?', [username], (err, result, fields) => {
+            if (err) {
+                console.log(err);
+                reject(err);
+            } else {
+                resolve(result[0].id);
+            }
+        });
+    });
 }
 
 module.exports = router;
