@@ -82,8 +82,7 @@
                     <i class="bx bx-lock-alt"></i>
                 </div>
                 <div class="input-box">
-                    <input type="submit" class="submit" id="submit_register_button" onclick="register()"
-                        value="Register">
+                    <input type="submit" class="submit" id="submit_register_button" onclick="register()" value="Register">
                 </div>
                 <div class="two-col">
                     <div class="one">
@@ -100,10 +99,18 @@
         const registerBtn = document.getElementById("registerBtn");
         const loginContainer = document.getElementById("login");
         const registerContainer = document.getElementById("register");
+        const register_submit_button = document.getElementById("submit_register_button");
 
         // Initially show login container and hide register container
         loginContainer.style.display = "block";
         registerContainer.style.display = "none";
+
+        register_submit_button.addEventListener("click", () => {
+            loginContainer.style.display = "block";
+            registerContainer.style.display = "none";
+            register_submit_button.classList.remove("active");
+            loginBtn.classList.add("active");
+        });
 
         // Add event listeners to buttons
         loginBtn.addEventListener("click", () => {
