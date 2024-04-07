@@ -7,20 +7,35 @@
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
 }
-body{
-    background: url("002.jpg");
+
+body
+{
+    background: url("istockphoto-1333602399-2048x2048-Photoroom.png");
     background-size: cover;
-    background-repeat: no-repeat;
+    background-repeat: round;
     background-attachment: fixed;
     overflow: hidden;
+    animation: diagonalBackground 12s ease-in-out infinite;
+    animation-play-state: running;
 }
+
+@keyframes diagonalBackground {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: -100vw 0;
+    }
+}
+
 .wrapper{
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 110vh;
-    background: rgba(39, 39, 39, 0.4);
+    min-height: 100vh;
+    background: rgba(126, 123, 123, 0.77);
 }
+
 .nav{
     position: fixed;
     top: 0;
@@ -79,31 +94,38 @@ body{
     display: none;
 }
 .form-box{
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 512px;
     height: 420px;
     overflow: hidden;
     z-index: 2;
+    background: rgba(65, 64, 64, .2);
+    backdrop-filter: blur(2px);
+    border-radius: 20px;
+    padding: 30px 40px;
 }
-.login-container{
-    position: absolute;
-    left: 4px;
-    width: 500px;
+.login-container {
+    width: 100%;
     display: flex;
     flex-direction: column;
     transition: .5s ease-in-out;
 }
-.register-container{
+
+.register-container {
     position: absolute;
-    right: -520px;
-    width: 500px;
-    display: flex;
+    right: 0; 
+    left: 4%;
+    top: 50%; 
+    transform: translateY(-50%);
+    width: 90%;
+    height: 104%;
     flex-direction: column;
     transition: .5s ease-in-out;
 }
+
 .top span{
     color: #fff;
     font-size: small;

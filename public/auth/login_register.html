@@ -32,7 +32,7 @@
 
             <div class="login-container" id="login">
                 <div class="top">
-                    <span>Don't have an account? <a href="#" onclick="show_register()">Sign Up</a></span>
+                    <span>Don't have an account? <a href="#register" id="signup-link" onclick="show_register()">Sign Up</a></span>
                     <header>Login</header>
                 </div>
                 <div class="input-box">
@@ -60,7 +60,7 @@
             <!------------------- registration form -------------------------->
             <div class="register-container" id="register">
                 <div class="top">
-                    <span>Have an account? <a href="#" onclick="show_login()">Login</a></span>
+                    <span>Have an account? <a href="#" id="login-link" onclick="show_login()">Login</a></span>
                     <header>Sign Up</header>
                 </div>
                 <div class="two-forms">
@@ -95,6 +95,51 @@
         </div>
     </div>
 
+    <script>
+        const loginBtn = document.getElementById("loginBtn");
+        const registerBtn = document.getElementById("registerBtn");
+        const loginContainer = document.getElementById("login");
+        const registerContainer = document.getElementById("register");
+
+        // Initially show login container and hide register container
+        loginContainer.style.display = "block";
+        registerContainer.style.display = "none";
+
+        // Add event listeners to buttons
+        loginBtn.addEventListener("click", () => {
+            loginContainer.style.display = "block";
+            registerContainer.style.display = "none";
+            loginBtn.classList.add("active");
+            registerBtn.classList.remove("active");
+        });
+
+        registerBtn.addEventListener("click", () => {
+            loginContainer.style.display = "none";
+            registerContainer.style.display = "block";
+            loginBtn.classList.remove("active");
+            registerBtn.classList.add("active");
+        });
+
+        document.getElementById('signup-link').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent default navigation behavior
+        
+            // Show register container and hide login container
+            var registerContainer = document.getElementById('register');
+            var loginContainer = document.getElementById('login');
+            loginContainer.style.display = 'none';
+            registerContainer.style.display = 'flex';
+        });
+
+        document.getElementById('login-link').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent default navigation behavior
+        
+            // Show login container and hide register container
+            var loginContainer = document.getElementById('login');
+            var registerContainer = document.getElementById('register');
+            loginContainer.style.display = 'flex';
+            registerContainer.style.display = 'none';
+        });
+    </script>
 </body>
 
 </html>
