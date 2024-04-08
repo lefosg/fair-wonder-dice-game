@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,145 +7,128 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="login_register.css">
     <title>Dice Games| Login & Registration</title>
-    <script defer src="./auth_client.js"></script>
 </head>
-
 <body>
-    <div class="wrapper">
-        <nav class="nav">
-            <div class="nav-menu" id="navMenu">
-            </div>
-            <div class="nav-button">
-                <button class="btn white-btn" id="loginBtn" onclick="show_login()">Sign In</button>
-                <button class="btn" id="registerBtn" onclick="show_register()">Sign Up</button>
-            </div>
-            <div class="nav-menu-btn">
-                <i class="bx bx-menu" onclick="myMenuFunction()"></i>
-            </div>
-        </nav>
+ <div class="wrapper">
+    <nav class="nav">
+        <div class="nav-menu" id="navMenu">  
+        </div>
+        <div class="nav-button">
+            <button class="btn white-btn" id="loginBtn" onclick="login()">Sign In</button>
+            <button class="btn" id="registerBtn" onclick="register()">Sign Up</button>
+        </div>
+        <div class="nav-menu-btn">
+            <i class="bx bx-menu" onclick="myMenuFunction()"></i>
+        </div>
+    </nav>
 
-        <!----------------------------- Form box ----------------------------------->
-        <div class="form-box">
+<!----------------------------- Form box ----------------------------------->    
+    <div class="form-box">
+        
+        <!------------------- login form -------------------------->
 
-            <!------------------- login form -------------------------->
-
-            <div class="login-container" id="login">
-                <div class="top">
-                    <span>Don't have an account? <a href="#register" id="signup-link" onclick="show_register()">Sign Up</a></span>
-                    <header>Login</header>
+        <div class="login-container" id="login">
+            <div class="top">
+                <span>Don't have an account? <a href="#" onclick="register()">Sign Up</a></span>
+                <header>Login</header>
+            </div>
+            <div class="input-box">
+                <input type="text" class="input-field" placeholder="Username">
+                <i class="bx bx-user"></i>
+            </div>
+            <div class="input-box">
+                <input type="password" class="input-field" placeholder="Password">
+                <i class="bx bx-lock-alt"></i>
+            </div>
+            <div class="input-box">
+                <input type="submit" class="submit" value="Sign In">
+            </div>
+            <div class="two-col">
+                <div class="one">
+                    <input type="checkbox" id="login-check">
+                    <label for="login-check"> Remember Me</label>
                 </div>
+                <div class="two">
+                    <label><a href="#">Forgot password?</a></label>
+                </div>
+            </div>
+        </div>
+
+        <!------------------- registration form -------------------------->
+        <div class="register-container" id="register">
+            <div class="top">
+                <span>Have an account? <a href="#" onclick="login()">Login</a></span>
+                <header>Sign Up</header>
+            </div>
+            <div class="two-forms">
                 <div class="input-box">
-                    <input type="text" class="input-field" id="login_username" placeholder="Username">
+                    <input type="text" class="input-field" placeholder="Firstname">
                     <i class="bx bx-user"></i>
                 </div>
                 <div class="input-box">
-                    <input type="password" class="input-field" id="login_password" placeholder="Password">
-                    <i class="bx bx-lock-alt"></i>
-                </div>
-                <div class="input-box">
-                    <input type="submit" id="submit_login_btn" onclick="login()" class="submit" value="Sign In">
-                </div>
-                <div class="two-col">
-                    <div class="one">
-                        <input type="checkbox" id="login-check">
-                        <label for="login-check"> Remember Me</label>
-                    </div>
-                    <div class="two">
-                        <label><a href="#">Forgot password?</a></label>
-                    </div>
-                </div>
-            </div>
-
-            <!------------------- registration form -------------------------->
-            <div class="register-container" id="register">
-                <div class="top">
-                    <span>Have an account? <a href="#" id="login-link" onclick="show_login()">Login</a></span>
-                    <header>Sign Up</header>
-                </div>
-                <div class="two-forms">
-                    <div class="input-box">
-                        <input type="text" class="input-field" id="register_first_name" placeholder="Firstname">
-                        <i class="bx bx-user"></i>
-                    </div>
-                    <div class="input-box">
-                        <input type="text" class="input-field" id="register_last_name" placeholder="Lastname">
-                        <i class="bx bx-user"></i>
-                    </div>
-                </div>
-                <div class="input-box">
-                    <input type="username" class="input-field" id="register_username" placeholder="Username">
+                    <input type="text" class="input-field" placeholder="Lastname">
                     <i class="bx bx-user"></i>
                 </div>
-                <div class="input-box">
-                    <input type="password" class="input-field" id="register_password" placeholder="Password">
-                    <i class="bx bx-lock-alt"></i>
-                </div>
-                <div class="input-box">
-                    <input type="submit" class="submit" id="submit_register_button" onclick="register()" value="Register">
-                </div>
-                <div class="two-col">
-                    <div class="one">
-                        <input type="checkbox" id="register-check">
-                        <label for="register-check"> Remember Me</label>
-                    </div>
+            </div>
+           
+            <div class="input-box">
+                <input type="password" class="input-field" placeholder="Password">
+                <i class="bx bx-lock-alt"></i>
+            </div>
+            <div class="input-box">
+                <input type="submit" class="submit" value="Register">
+            </div>
+            <div class="two-col">
+                <div class="one">
+                    <input type="checkbox" id="register-check">
+                    <label for="register-check"> Remember Me</label>
                 </div>
             </div>
         </div>
     </div>
+</div>   
 
-    <script>
-        const loginBtn = document.getElementById("loginBtn");
-        const registerBtn = document.getElementById("registerBtn");
-        const loginContainer = document.getElementById("login");
-        const registerContainer = document.getElementById("register");
-        const register_submit_button = document.getElementById("submit_register_button");
 
-        // Initially show login container and hide register container
-        loginContainer.style.display = "block";
-        registerContainer.style.display = "none";
+<script>
+   
+   function myMenuFunction() {
+    var i = document.getElementById("navMenu");
 
-        register_submit_button.addEventListener("click", () => {
-            loginContainer.style.display = "block";
-            registerContainer.style.display = "none";
-            register_submit_button.classList.remove("active");
-            loginBtn.classList.add("active");
-        });
+    if(i.className === "nav-menu") {
+        i.className += " responsive";
+    } else {
+        i.className = "nav-menu";
+    }
+   }
+ 
+</script>
 
-        // Add event listeners to buttons
-        loginBtn.addEventListener("click", () => {
-            loginContainer.style.display = "block";
-            registerContainer.style.display = "none";
-            loginBtn.classList.add("active");
-            registerBtn.classList.remove("active");
-        });
+<script>
 
-        registerBtn.addEventListener("click", () => {
-            loginContainer.style.display = "none";
-            registerContainer.style.display = "block";
-            loginBtn.classList.remove("active");
-            registerBtn.classList.add("active");
-        });
+    var a = document.getElementById("loginBtn");
+    var b = document.getElementById("registerBtn");
+    var x = document.getElementById("login");
+    var y = document.getElementById("register");
 
-        document.getElementById('signup-link').addEventListener('click', function(event) {
-            event.preventDefault(); // Prevent default navigation behavior
-        
-            // Show register container and hide login container
-            var registerContainer = document.getElementById('register');
-            var loginContainer = document.getElementById('login');
-            loginContainer.style.display = 'none';
-            registerContainer.style.display = 'flex';
-        });
+    function login() {
+        x.style.left = "4px";
+        y.style.right = "-520px";
+        a.className += " white-btn";
+        b.className = "btn";
+        x.style.opacity = 1;
+        y.style.opacity = 0;
+    }
 
-        document.getElementById('login-link').addEventListener('click', function(event) {
-            event.preventDefault(); // Prevent default navigation behavior
-        
-            // Show login container and hide register container
-            var loginContainer = document.getElementById('login');
-            var registerContainer = document.getElementById('register');
-            loginContainer.style.display = 'flex';
-            registerContainer.style.display = 'none';
-        });
-    </script>
+    function register() {
+        x.style.left = "-510px";
+        y.style.right = "5px";
+        a.className = "btn";
+        b.className += " white-btn";
+        x.style.opacity = 0;
+        y.style.opacity = 1;
+    }
+
+</script>
+
 </body>
-
 </html>
