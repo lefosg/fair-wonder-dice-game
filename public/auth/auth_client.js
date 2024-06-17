@@ -34,6 +34,7 @@ async function register() {
     let lname = document.getElementById('register_last_name').value;
     let uname = document.getElementById('register_username').value;
     let pword = document.getElementById('register_password').value;
+    let pword2 = document.getElementById('register_password2').value;
 
     //send credentials to server
     fetch(window.location.origin + '/auth/register', {
@@ -46,7 +47,8 @@ async function register() {
             first_name: fname,
             last_name: lname,
             username: uname,
-            password: pword
+            password: pword,
+            password2: pword2
         })
     })
         .then(r => r.json())
@@ -67,6 +69,7 @@ function clearRegisterForm() {
     document.getElementById('register_last_name').value = "";
     document.getElementById('register_username').value = "";
     document.getElementById('register_password').value = "";
+    document.getElementById('register_password2').value = "";
 }
 
 function clearLoginForm() {

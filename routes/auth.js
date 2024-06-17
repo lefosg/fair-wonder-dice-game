@@ -17,6 +17,7 @@ const login_false_response = { auth: false, msg: "username or password invalid" 
 const enc_false_response = { auth: false, msg: "Bad Encrypt" };
 const register_true_response = { auth: true, msg: "registered" };
 const register_false_response = { auth: false, msg: "username taken" };
+const register_confirm_pword_invalid = { auth: false, msg: "Passwords do not match" };
 const invalid_uname_format = { auth: false, msg: "!!!Invalid username format!!!" };
 const bad_characters = { auth: false, msg: "Username cannot contain symbols like '-' or single quote or double quote!!!" };
 const bad_password_length = { auth: false, msg: "!!!Password length must be at least 8 and no more than 20 characters!!!" };
@@ -49,7 +50,7 @@ router.post('/login', checkJWTExists, (req, res) => {
     const { username, password } = req.body;
     console.log("Attempting login with credentials: " + username + " " + password);
 
-        //check for empty fields
+    //check for empty fields
     if (username.trim() == "" || password.trim() == "") {
         return res.json(empty_fields);
     }
@@ -105,25 +106,25 @@ router.post('/login', checkJWTExists, (req, res) => {
             const hashed_password = SHA3hashPassword(password, salted);
             const enc_hash_pass = AESEncryptHashedPass(hashed_password, ekey, vector);
 
-        //3b. check if (1.)encrypted password == (2.)password given by the user
-        if (enc_hash_pass == stored_enc_pass_hash) {
-            console.log("logging in");
-            //res.json(login_true_response);
-            //4. generate jwt token
-            const token = jwt.sign({ username: username, password: enc_hash_pass }, process.env.JWT_SECRET, { expiresIn: "1h" });
-            res.cookie("token", token, {
-                httpOnly: true, // Cookies are accessible only through http(s)
-                secure: true, // Only sent over https
-                // maxAge: 1000000,
-                // signed: true
-            });
-            res.json(login_true_response);
-        } else {
-            console.log("failed to log in");
-            return res.json(login_false_response);
-        }
+            //3b. check if (1.)encrypted password == (2.)password given by the user
+            if (enc_hash_pass == stored_enc_pass_hash) {
+                console.log("logging in");
+                //res.json(login_true_response);
+                //4. generate jwt token
+                const token = jwt.sign({ username: username, password: enc_hash_pass }, process.env.JWT_SECRET, { expiresIn: "1h" });
+                res.cookie("token", token, {
+                    httpOnly: true, // Cookies are accessible only through http(s)
+                    secure: true, // Only sent over https
+                    // maxAge: 1000000,
+                    // signed: true
+                });
+                res.json(login_true_response);
+            } else {
+                console.log("failed to log in");
+                return res.json(login_false_response);
+            }
+        });
     });
-  });
 });
 
 /**
@@ -131,7 +132,10 @@ router.post('/login', checkJWTExists, (req, res) => {
  */
 router.post('/register', checkJWTExists, (req, res) => {
     //0. get the credentials from the post request
-    const { first_name, last_name, username, password } = req.body;
+    const { first_name, last_name, username, password, password2 } = req.body;
+    if (password != password2) {
+        return res.json(register_confirm_pword_invalid);
+    }
     const salty = generateRandomSecret();
     // const enc_salty = AESEncryptHashedPass(salty, salt_key);
 
