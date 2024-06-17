@@ -20,6 +20,8 @@ const register_false_response = { auth: false, msg: "username taken" };
 const register_confirm_pword_invalid = { auth: false, msg: "Passwords do not match" };
 const invalid_uname_format = { auth: false, msg: "!!!Invalid username format!!!" };
 const bad_characters = { auth: false, msg: "Username cannot contain symbols like '-' or single quote or double quote!!!" };
+const bad_fname = { auth: false, msg: "First name cannot contain symbols like '-' or single quote or double quote!!!" };
+const bad_lname = { auth: false, msg: "Last name cannot contain symbols like '-' or single quote or double quote!!!" };
 const bad_password_length = { auth: false, msg: "!!!Password length must be at least 8 and no more than 20 characters!!!" };
 const empty_fields = { auth: false, msg: "Fields must not be empty" };
 const logout_successful = { logout: true, msg: "logged out successfully" };
@@ -151,9 +153,20 @@ router.post('/register', checkJWTExists, (req, res) => {
     }
 
     // Extra measures to further prevent SQL Injection Attempts like user input sanitization
+    if (!inputValidate.isAlphanumeric(first_name)) {
+        return res.json(bad_fname);
+    }
+
+    // Extra measures to further prevent SQL Injection Attempts like user input sanitization
+    if (!inputValidate.isAlphanumeric(last_name)) {
+        return res.json(bad_lname);
+    }
+
+    // Extra measures to further prevent SQL Injection Attempts like user input sanitization
     if (!inputValidate.isAlphanumeric(username)) {
         return res.json(bad_characters);
     }
+
 
     if ((password.length < 8) || (password.length > 20)) {
         return res.json(bad_password_length);
