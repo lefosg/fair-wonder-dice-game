@@ -151,7 +151,7 @@ router.post('/register', checkJWTExists, (req, res) => {
         return res.json(bad_characters);
     }
 
-    if ((password.length < 6) || (password.length > 20)) {
+    if ((password.length < 8) || (password.length > 20)) {
         return res.json(bad_password_length);
     }
 
