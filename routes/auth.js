@@ -22,7 +22,7 @@ const invalid_uname_format = { auth: false, msg: "!!!Invalid username format!!!"
 const bad_characters = { auth: false, msg: "Username cannot contain symbols like '-' or single quote or double quote!!!" };
 const bad_fname = { auth: false, msg: "First name cannot contain symbols like '-' or single quote or double quote!!!" };
 const bad_lname = { auth: false, msg: "Last name cannot contain symbols like '-' or single quote or double quote!!!" };
-const bad_password_length = { auth: false, msg: "!!!Password length must be at least 8 and no more than 20 characters!!!" };
+const bad_password_length = { auth: false, msg: "Password length must be at least 8 and no more than 20 characters" };
 const empty_fields = { auth: false, msg: "Fields must not be empty" };
 const logout_successful = { logout: true, msg: "logged out successfully" };
 const logout_failed = { logout: true, msg: "log out failed" };
@@ -84,7 +84,7 @@ router.post('/login', checkJWTExists, (req, res) => {
         // console.log(result);
         //if no records where returned, the given username does not exist
         if (result.length == 0) {
-            failedlogins.set(username, (failedlogins.get(username) || 0) + 1);
+            //failedlogins.set(username, (failedlogins.get(username) || 0) + 1);
             res.json(login_false_response);
             return;
         }
@@ -122,6 +122,7 @@ router.post('/login', checkJWTExists, (req, res) => {
                 });
                 res.json(login_true_response);
             } else {
+                failedlogins.set(username, (failedlogins.get(username) || 0) + 1);
                 console.log("failed to log in");
                 return res.json(login_false_response);
             }
