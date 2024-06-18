@@ -10,23 +10,25 @@ const jwt = require('jsonwebtoken');
 const router = Router();
 //const pass_key = process.env.PASSWORD_KEY;
 //const salt_key = process.env.SALT_KEY;
+const specialChars = /[`!@#$%^&*()_\-+=\[\]{};':"\\|,.<>\/?~ ]/;
 
 //Replies for authentication attempts
-const login_true_response = { auth: true, msg: "logged in" };
-const login_false_response = { auth: false, msg: "username or password invalid" };
+const login_true_response = { auth: true, msg: "Logged in" };
+const login_false_response = { auth: false, msg: "Username or password invalid" };
 const enc_false_response = { auth: false, msg: "Bad Encrypt" };
-const register_true_response = { auth: true, msg: "registered" };
-const register_false_response = { auth: false, msg: "username taken" };
+const register_true_response = { auth: true, msg: "Registered" };
+const register_false_response = { auth: false, msg: "Username taken" };
 const register_confirm_pword_invalid = { auth: false, msg: "Passwords do not match" };
-const invalid_uname_format = { auth: false, msg: "!!!Invalid username format!!!" };
-const bad_characters = { auth: false, msg: "Username cannot contain symbols like '-' or single quote or double quote!!!" };
-const bad_fname = { auth: false, msg: "First name cannot contain symbols like '-' or single quote or double quote!!!" };
-const bad_lname = { auth: false, msg: "Last name cannot contain symbols like '-' or single quote or double quote!!!" };
+const invalid_uname_format = { auth: false, msg: "Invalid username format" };
+const bad_characters = { auth: false, msg: "Username cannot contain symbols like '-' or single quote or double quote" };
+const bad_fname = { auth: false, msg: "First name cannot contain symbols like '-' or single quote or double quote" };
+const bad_lname = { auth: false, msg: "Last name cannot contain symbols like '-' or single quote or double quote" };
 const bad_password_length = { auth: false, msg: "Password length must be at least 8 and no more than 20 characters" };
 const empty_fields = { auth: false, msg: "Fields must not be empty" };
-const logout_successful = { logout: true, msg: "logged out successfully" };
-const logout_failed = { logout: true, msg: "log out failed" };
-const blocked_user = { auth: false, msg: "This user has been blocked. Please contact our support department for further assistance!!!" };
+const logout_successful = { logout: true, msg: "Logged out successfully" };
+const logout_failed = { logout: true, msg: "Log out failed" };
+const blocked_user = { auth: false, msg: "This user has been blocked. Please contact our support department for further assistance" };
+const register_no_match_policy = { logout: true, msg: "Password does not match the policy" };
 
 
 //Endpoints
@@ -74,8 +76,6 @@ router.post('/login', checkJWTExists, (req, res) => {
         blockList.add(username);
         return res.json(blocked_user);
     }
-
-    // Check password validity according to the policy
 
     //1. get user from database, with the use of PreparedStatement as a measure against SQL Injection
     mysqlconn.query(`SELECT id, password FROM users WHERE username=?`, [username], function (err, result, fields) {
@@ -171,8 +171,10 @@ router.post('/register', checkJWTExists, (req, res) => {
     }
 
 
-    if ((password.length < 8) || (password.length > 20)) {
-        return res.json(bad_password_length);
+    // Check password validity according to the policy. If doesnt match, inform user
+    // 1,2 check for length, 3 check for special characters, 4 check if contains number
+    if (password.length < 8 || password.length > 20 || !specialChars.test(password) || !/\d/.test(password) || !/[a-zA-Z]/g.test(password)) {
+        return res.json(register_no_match_policy);
     }
 
     //1. check if user already in db, if exists, throw error (Prepared Statements)
