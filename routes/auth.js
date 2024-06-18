@@ -75,6 +75,8 @@ router.post('/login', checkJWTExists, (req, res) => {
         return res.json(blocked_user);
     }
 
+    // Check password validity according to the policy
+
     //1. get user from database, with the use of PreparedStatement as a measure against SQL Injection
     mysqlconn.query(`SELECT id, password FROM users WHERE username=?`, [username], function (err, result, fields) {
         if (err) {

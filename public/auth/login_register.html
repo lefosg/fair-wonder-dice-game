@@ -9,6 +9,11 @@
     <link rel="stylesheet" href="login_register.css">
     <title>Dice Games| Login & Registration</title>
     <script defer src="./auth_client.js"></script>
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+        integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+
+    <link href="https://fonts.googleapis.com/css?family=Aleo|Slabo+27px" rel="stylesheet">
 </head>
 
 <body>
@@ -33,10 +38,6 @@
             <!------------------- login form -------------------------->
 
             <div class="login-container" id="login">
-                <div class="top">
-                    <span>Don't have an account? <a href="#" onclick="show_register()">Sign Up</a></span>
-                    <header>Login</header>
-                </div>
 
                 <div class="input-box">
                     <input type="text" class="input-field" id="login_username" placeholder="Username">
@@ -50,22 +51,12 @@
                     <input type="submit" id="submit_login_btn" onclick="login()" class="submit" value="Sign In">
                 </div>
                 <div class="two-col">
-                    <div class="one">
-                        <input type="checkbox" id="login-check">
-                        <label for="login-check"> Remember Me</label>
-                    </div>
-                    <div class="two">
-                        <label><a href="#">Forgot password?</a></label>
-                    </div>
                 </div>
             </div>
 
             <!------------------- registration form -------------------------->
             <div class="register-container" id="register">
-                <div class="top">
-                    <span>Have an account? <a href="#" onclick="show_login()">Login</a></span>
-                    <header>Sign Up</header>
-                </div>
+
                 <div class="two-forms">
                     <div class="input-box">
                         <input type="text" class="input-field" id="register_first_name" placeholder="Firstname">
@@ -81,23 +72,41 @@
                     <i class="bx bx-user"></i>
                 </div>
                 <div class="input-box">
-                    <input type="password" class="input-field" id="register_password" placeholder="Password">
+                    <input type="password" class="input-field" id="register_password" placeholder="Password"
+                        onInput="check()">
                     <i class="bx bx-lock-alt"></i>
                 </div>
                 <div class="input-box">
                     <input type="password" class="input-field" id="register_password2" placeholder="Confirm Password">
                     <i class="bx bx-lock-alt"></i>
                 </div>
+
+                <!-- policy start -->
+                <div class="policy-container">
+                    <div id="check0">
+                        <i class="far fa-check-circle"></i> <span> Length more than 8.</span>
+                    </div>
+                    <div id="check1">
+                        <i class="far fa-check-circle"></i> <span> Length less than 20.</span>
+                    </div>
+                    <div id="check2">
+                        <i class="far fa-check-circle"></i> <span> Contains alphanumerical characters.</span>
+                    </div>
+                    <div id="check3">
+                        <i class="far fa-check-circle"></i> <span>Contains at least one special character.</span>
+                    </div>
+                    <div id="check4">
+                        <i class="far fa-check-circle"></i> <span>Shouldn't contain spaces.</span>
+                    </div>
+                </div>
+                <!-- policy end -->
+
+
                 <div class="input-box">
                     <input type="submit" class="submit" id="submit_register_button" onclick="register()"
                         value="Register">
                 </div>
-                <div class="two-col">
-                    <div class="one">
-                        <input type="checkbox" id="register-check">
-                        <label for="register-check"> Remember Me</label>
-                    </div>
-                </div>
+
             </div>
         </div>
     </div>
